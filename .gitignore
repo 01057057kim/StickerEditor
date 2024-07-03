@@ -24,5 +24,4 @@ dist-ssr
 *.sw?
 
 .env
-src/components/Generate.vue
-.env
+
