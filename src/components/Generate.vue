@@ -4,7 +4,7 @@ import OpenAI from 'openai'
 import LoadingGIF from '../assets/Images/Loading.gif'
 
 const openai = new OpenAI({
-    organization: 'org-XXygSipTZ0fjqKM619BA11Cp',
+    organization: import.meta.env.VITE_OPENAI_ORG_KEY,
     apiKey: import.meta.env.VITE_OPENAI_API_KEY,
     dangerouslyAllowBrowser: true,
 })
@@ -33,7 +33,8 @@ const getCompletions = async () => {
         isLoading.value = false
     }
 }
-
+//console.log(import.meta.env.VITE_OPENAI_API_KEY);
+//console.log(import.meta.env.VITE_OPENAI_ORG_KEY); 
 </script>
 
 <template>

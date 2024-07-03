@@ -29,10 +29,19 @@ let images = ref([
 let typeButton = ref(false);
 let selectedImage = ref(null);
 const savedImages = ref([]);
+const editorRef = ref(null);
 
 const handleNewImage = (newImage) => {
     images.value.unshift({ src: newImage, alt: 'New Image' });
 };
+
+const handleStickerSelected = (stickerSrc) => {
+    if (editorRef.value) {
+        editorRef.value.addSticker(stickerSrc);
+    }
+};
+
+provide('handleStickerSelected', handleStickerSelected);
 
 provide('images', images)
 provide('selectedImage', selectedImage);
@@ -46,7 +55,7 @@ provide('savedImages', savedImages);
             <AsideLeft />
         </aside>
         <main class="row-span-1 flex items-center justify-center min-h-screen absolute left-1/4 right-1/4">
-            <Editor :selected-image="selectedImage" @newImage="handleNewImage" />
+            <Editor ref="editorRef" :selected-image="selectedImage" @newImage="handleNewImage" />
         </main>
         <aside class="row-span-1 h-screen flex justify-end absolute right-0 ">
             <AsideRight @select-image="selectedImage = $event" />
