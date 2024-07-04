@@ -15,6 +15,7 @@ const selectedSticker = ref(null);
 const MIN_SIZE = 40;
 const SCALE_FACTOR = 0.7;
 
+    
 const addSticker = (stickerSrc) => {
     const newSticker = {
         id: Date.now(),
@@ -40,19 +41,15 @@ const onDrag = ({ target, clientX, clientY }) => {
         const imgRect = imgRef.value.getBoundingClientRect();
         const stickerRect = target.getBoundingClientRect();
 
-        // Calculate the sticker's center position
         let x = clientX - imgRect.left;
         let y = clientY - imgRect.top;
 
-        // Calculate the sticker's half width and height
         const stickerHalfWidth = stickerRect.width / 2;
         const stickerHalfHeight = stickerRect.height / 2;
-
-        // Constrain the position within the image boundaries
+       
         x = Math.max(stickerHalfWidth, Math.min(x, imgRect.width - stickerHalfWidth));
         y = Math.max(stickerHalfHeight, Math.min(y, imgRect.height - stickerHalfHeight));
 
-        // Convert to percentage relative to the image size
         const xPercent = (x / imgRect.width) * 100;
         const yPercent = (y / imgRect.height) * 100;
 
@@ -138,15 +135,14 @@ const mergeImages = () => {
                         const width = parseFloat(sticker.style.width);
                         const height = parseFloat(sticker.style.height);
 
-                        // Scale positions and dimensions to match the original image size
                         const scaledLeft = left * scaleX;
                         const scaledTop = top * scaleY;
                         const scaledWidth = width * scaleX;
                         const scaledHeight = height * scaleY;
 
-                        // Extract rotation angle
                         const rotation = parseFloat(sticker.style.transform.match(/rotate\(([-\d.]+)deg\)/)?.[1] || 0);
 
+                        
                         ctx.save();
                         ctx.translate(scaledLeft, scaledTop);
                         ctx.rotate(rotation * Math.PI / 180);
