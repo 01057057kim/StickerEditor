@@ -3,16 +3,16 @@ import { ref, provide } from 'vue';
 import AsideLeft from './ImageEditorComponent/AsideLeft.vue';
 import AsideRight from './ImageEditorComponent/AsideRight.vue';
 import Editor from './ImageEditorComponent/Editor.vue';
-import addon1 from "../assets/Images/gallery/out2.png"
+import addon1 from "../assets/Images/gallery/out12.jpg"
 import addon2 from "../assets/Images/gallery/out3.png"
-import addon4 from "../assets/Images/gallery/out6.png"
+import addon4 from "../assets/Images/gallery/out4.png"
 import addon3 from "../assets/Images/gallery/out5.png"
-import addon5 from "../assets/Images/gallery/out7.png"
-import addon6 from "../assets/Images/gallery/out8.png"
-import addon7 from "../assets/Images/gallery/out9.png"
-import addon8 from "../assets/Images/gallery/out10.png"
-import addon9 from "../assets/Images/gallery/out11.png"
-import addon10 from "../assets/Images/gallery/out12.png"
+import addon5 from "../assets/Images/gallery/out6.png"
+import addon6 from "../assets/Images/gallery/out7.png"
+import addon7 from "../assets/Images/gallery/out8.png"
+import addon8 from "../assets/Images/gallery/out9.png"
+import addon9 from "../assets/Images/gallery/out10.png"
+import addon10 from "../assets/Images/gallery/out11.jpg"
 
 let images = ref([
     { src: addon1, alt: 'add on 1' },
@@ -25,6 +25,7 @@ let images = ref([
     { src: addon8, alt: 'add on 8' },
     { src: addon9, alt: 'add on 9' },
     { src: addon10, alt: 'add on 10' },
+
 ])
 let typeButton = ref(false);
 let selectedImage = ref(null);

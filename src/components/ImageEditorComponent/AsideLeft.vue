@@ -7,6 +7,7 @@ import addon3 from '../../assets/Images/sticker/add3.png';
 import addon4 from '../../assets/Images/sticker/add4.png';
 import addon5 from '../../assets/Images/sticker/add5.png';
 import addon6 from '../../assets/Images/sticker/add6.png';
+import addon7 from '../../assets/Images/sticker/add21.jpg';
 
 let images = ref([
     { src: addon1, alt: 'add on 1' },
@@ -15,6 +16,7 @@ let images = ref([
     { src: addon4, alt: 'add on 4' },
     { src: addon5, alt: 'add on 5' },
     { src: addon6, alt: 'add on 6' },
+    { src: addon7, alt: 'add on 7' },
 ]);
 
 const handleStickerSelected = inject('handleStickerSelected');
