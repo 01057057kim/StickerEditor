@@ -27,6 +27,7 @@ const throttleRotate = 0;
 const rotationPosition = "top";
 const scalingFactor = 0.1;
 
+    
 const addSticker = (stickerSrc) => {
     const imgRect = imgRef.value.getBoundingClientRect();
 
@@ -58,11 +59,26 @@ const onDrag = ({ target, clientX, clientY }) => {
         let x = clientX - imgRect.left;
         let y = clientY - imgRect.top;
 
+<<<<<<< HEAD
         x = Math.max(stickerRect.width / 2, Math.min(x, imgRect.width - stickerRect.width / 2));
         y = Math.max(stickerRect.height / 2, Math.min(y, imgRect.height - stickerRect.height / 2));
 
         sticker.style.leftPercent = (x / imgRect.width) * 100;
         sticker.style.topPercent = (y / imgRect.height) * 100;
+=======
+        const stickerHalfWidth = stickerRect.width / 2;
+        const stickerHalfHeight = stickerRect.height / 2;
+       
+        x = Math.max(stickerHalfWidth, Math.min(x, imgRect.width - stickerHalfWidth));
+        y = Math.max(stickerHalfHeight, Math.min(y, imgRect.height - stickerHalfHeight));
+
+        const xPercent = (x / imgRect.width) * 100;
+        const yPercent = (y / imgRect.height) * 100;
+
+        sticker.style.left = `${xPercent}%`;
+        sticker.style.top = `${yPercent}%`;
+        sticker.style.transform = `translate(-50%, -50%) ${sticker.style.transform.split(') ')[1] || ''}`;
+>>>>>>> 188a1c1c2dedb252f4bee873d2f7b33c1582b4c0
     }
 };
 
@@ -142,6 +158,7 @@ const mergeImages = () => {
                     const scaleX = scaleMatch ? parseFloat(scaleMatch[1]) : 1;
                     const scaleY = scaleMatch ? parseFloat(scaleMatch[1]) : 1;
 
+<<<<<<< HEAD
                     const finalStickerWidth = stickerWidth * scaleX;
                     const finalStickerHeight = stickerHeight * scaleY;
 
@@ -154,6 +171,21 @@ const mergeImages = () => {
                     callback();
                 };
             };
+=======
+                        const scaledLeft = left * scaleX;
+                        const scaledTop = top * scaleY;
+                        const scaledWidth = width * scaleX;
+                        const scaledHeight = height * scaleY;
+
+                        const rotation = parseFloat(sticker.style.transform.match(/rotate\(([-\d.]+)deg\)/)?.[1] || 0);
+
+                        
+                        ctx.save();
+                        ctx.translate(scaledLeft, scaledTop);
+                        ctx.rotate(rotation * Math.PI / 180);
+                        ctx.drawImage(stickerImg, -scaledWidth / 2, -scaledHeight / 2, scaledWidth, scaledHeight);
+                        ctx.restore();
+>>>>>>> 188a1c1c2dedb252f4bee873d2f7b33c1582b4c0
 
             let stickersProcessed = 0;
             const totalStickers = stickers.value.length;
@@ -315,5 +347,8 @@ defineExpose({ addSticker });
     cursor: pointer;
 }
 </style>
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 188a1c1c2dedb252f4bee873d2f7b33c1582b4c0
