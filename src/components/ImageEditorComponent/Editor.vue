@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, inject, watch, nextTick } from 'vue';
+import { ref, onMounted, inject, watch, nextTick, computed } from 'vue';
 import * as markerjs2 from 'markerjs2';
 import Moveable from "vue3-moveable";
 import imagetest from '../../assets/Images/testimg.jpg';
@@ -7,39 +7,45 @@ import imagetest from '../../assets/Images/testimg.jpg';
 let imgRef = ref(null);
 let downloadButton = ref(null);
 let originalImageSrc = null;
+
 const selectedImage = inject('selectedImage');
 const savedImages = inject('savedImages');
 const images = inject('images');
 const stickers = ref([]);
 const selectedSticker = ref(null);
 
-const draggable = true;
 const throttleDrag = 1;
-const edgeDraggable = false;
-const startDragRotate = 0;
-const throttleDragRotate = 0;
-const scalable = true;
-const keepRatio = false;
-const throttleScale = 0;
-const renderDirections = ["nw", "n", "ne", "w", "e", "sw", "s", "se"];
-const rotatable = true;
-const throttleRotate = 0;
-const rotationPosition = "top";
-const scalingFactor = 0.1;
+const throttleResize = 0;
+
+const showSticker = computed(() => stickers.value.length > 0);
+
+const confirmMerge = async () => {
+    try {
+        const mergedImageSrc = await mergeImages();
+        imgRef.value.src = mergedImageSrc;
+        downloadButton.value.href = mergedImageSrc;
+        clearStickers();
+    } catch (error) {
+        console.error("Merge failed", error);
+    }
+}
 
 const addSticker = (stickerSrc) => {
     const imgRect = imgRef.value.getBoundingClientRect();
+
+    const defaultWidth = 150;
+    const defaultHeight = 150;
 
     const newSticker = {
         id: Date.now(),
         src: stickerSrc,
         style: {
             position: 'absolute',
-            leftPercent: 50, // Centered position as percentage
-            topPercent: 50,  // Centered position as percentage
-            widthPercent: (100 / imgRect.width) * 100,  // Width as percentage
-            heightPercent: (100 / imgRect.height) * 100, // Height as percentage
-            transform: 'translate(-50%, -50%) rotate(0deg) scale(1, 1)' // Initial scale added
+            leftPercent: 50,
+            topPercent: 50,
+            widthPercent: (defaultWidth / imgRect.width) * 100,
+            heightPercent: (defaultHeight / imgRect.height) * 100,
+            transform: 'translate(-50%, -50%) rotate(0deg) scale(1, 1)'
         }
     };
 
@@ -66,21 +72,21 @@ const onDrag = ({ target, clientX, clientY }) => {
     }
 };
 
-const onScale = (e) => {
-    e.target.style.transform = e.drag.transform;  // Apply the scale transformation
-    const sticker = stickers.value.find(s => s.id === parseInt(e.target.dataset.id));
-    if (sticker) {
+const onResize = ({ target, width, height }) => {
+    const sticker = stickers.value.find(s => s.id === parseInt(target.dataset.id));
+    if (sticker && imgRef.value) {
         const imgRect = imgRef.value.getBoundingClientRect();
-        const stickerRect = e.target.getBoundingClientRect();
 
-        // Convert the scale transformation to percentage width/height
-        sticker.style.widthPercent = (stickerRect.width / imgRect.width) * 100;
-        sticker.style.heightPercent = (stickerRect.height / imgRect.height) * 100;
+        const widthPercent = (width / imgRect.width) * 100;
+        const heightPercent = (height / imgRect.height) * 100;
+
+        sticker.style.widthPercent = widthPercent;
+        sticker.style.heightPercent = heightPercent;
     }
 };
 
 const onRotate = (e) => {
-    e.target.style.transform = e.drag.transform;  // Apply the rotation transformation
+    e.target.style.transform = e.drag.transform;
     const sticker = stickers.value.find(s => s.id === parseInt(e.target.dataset.id));
     if (sticker) {
         sticker.style.transform = e.drag.transform;
@@ -105,79 +111,77 @@ const selectSticker = (id) => {
 
 const mergeImages = () => {
     return new Promise((resolve, reject) => {
-        if (!imgRef.value) {
-            reject(new Error("Image reference not found"));
-            return;
-        }
-
-        const img = imgRef.value;
-        const imgWidth = img.naturalWidth;
-        const imgHeight = img.naturalHeight;
-
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-        canvas.width = imgWidth;
-        canvas.height = imgHeight;
-
         const baseImage = new Image();
-        baseImage.src = img.src;
 
         baseImage.onload = () => {
-            ctx.drawImage(baseImage, 0, 0, imgWidth, imgHeight);
+            canvas.width = baseImage.width;
+            canvas.height = baseImage.height;
+            ctx.drawImage(baseImage, 0, 0);
 
-            const drawSticker = (sticker, callback) => {
-                const stickerImage = new Image();
-                stickerImage.src = sticker.src;
+            console.log('Canvas size:', { width: canvas.width, height: canvas.height });
+            console.log('Original image size:', { width: baseImage.width, height: baseImage.height });
 
-                stickerImage.onload = () => {
-                    const stickerX = (sticker.style.leftPercent / 100) * imgWidth;
-                    const stickerY = (sticker.style.topPercent / 100) * imgHeight;
-                    const stickerWidth = (sticker.style.widthPercent / 100) * imgWidth;
-                    const stickerHeight = (sticker.style.heightPercent / 100) * imgHeight;
+            const loadStickers = stickers.value.map(sticker => {
+                return new Promise((resolveSticker) => {
+                    const img = new Image();
+                    img.onload = () => resolveSticker(img);
+                    img.onerror = () => resolveSticker(null);
+                    img.src = sticker.src;
+                });
+            });
 
-                    const transform = sticker.style.transform;
-                    const rotationMatch = transform.match(/rotate\((.*?)deg\)/);
-                    const rotation = rotationMatch ? parseFloat(rotationMatch[1]) : 0;
-                    const scaleMatch = transform.match(/scale\((.*?)\)/);
-                    const scaleX = scaleMatch ? parseFloat(scaleMatch[1]) : 1;
-                    const scaleY = scaleMatch ? parseFloat(scaleMatch[1]) : 1;
+            Promise.all(loadStickers).then(stickerImages => {
+                stickerImages.forEach((stickerImg, index) => {
+                    if (stickerImg) {
+                        const sticker = stickers.value[index];
+                        const leftPercent = sticker.style.leftPercent;
+                        const topPercent = sticker.style.topPercent;
+                        const widthPercent = sticker.style.widthPercent;
+                        const heightPercent = sticker.style.heightPercent;
 
-                    const finalStickerWidth = stickerWidth * scaleX;
-                    const finalStickerHeight = stickerHeight * scaleY;
+                        console.log(`Sticker ${index + 1} size before merge:`, { widthPercent, heightPercent });
 
-                    ctx.save();
-                    ctx.translate(stickerX, stickerY);
-                    ctx.rotate((rotation * Math.PI) / 180);
-                    ctx.drawImage(stickerImage, -finalStickerWidth / 2, -finalStickerHeight / 2, finalStickerWidth, finalStickerHeight);
-                    ctx.restore();
+                        const leftPx = (leftPercent / 100) * canvas.width;
+                        const topPx = (topPercent / 100) * canvas.height;
+                        const width = (widthPercent / 100) * canvas.width;
+                        const height = (heightPercent / 100) * canvas.height;
 
-                    callback();
-                };
-            };
+                        let rotation = 0;
+                        let scaleX = 1;
+                        let scaleY = 1;
+                        const transformMatch = sticker.style.transform.match(/rotate\(([-\d.]+)deg\) scale\(([-\d.]+),\s*([-\d.]+)\)/);
+                        if (transformMatch) {
+                            rotation = parseFloat(transformMatch[1]);
+                            scaleX = parseFloat(transformMatch[2]);
+                            scaleY = parseFloat(transformMatch[3]);
+                        }
 
-            let stickersProcessed = 0;
-            const totalStickers = stickers.value.length;
+                        console.log(`Sticker ${index + 1} scale factors:`, { scaleX, scaleY });
 
-            if (totalStickers === 0) {
-                resolve(canvas.toDataURL('image/png'));
-                return;
-            }
+                        ctx.save();
+                        ctx.translate(leftPx, topPx);
+                        ctx.rotate(rotation * Math.PI / 180);
 
-            stickers.value.forEach(sticker => {
-                drawSticker(sticker, () => {
-                    stickersProcessed++;
-                    if (stickersProcessed === totalStickers) {
-                        resolve(canvas.toDataURL('image/png'));
+                        const finalWidth = width * scaleX;
+                        const finalHeight = height * scaleY;
+
+                        console.log(`Sticker ${index + 1} size after merge:`, { finalWidth, finalHeight });
+
+                        ctx.drawImage(stickerImg, -finalWidth / 2, -finalHeight / 2, finalWidth, finalHeight);
+                        ctx.restore();
                     }
                 });
+                resolve(canvas.toDataURL('image/png'));
             });
         };
 
-        baseImage.onerror = () => {
-            reject(new Error("Failed to load the base image"));
-        };
+        baseImage.onerror = reject;
+        baseImage.src = imgRef.value.src;
     });
 };
+
 
 const showMarkerArea = async () => {
     try {
@@ -239,6 +243,10 @@ onMounted(() => {
     };
 });
 
+watch(stickers, (newStickers) => {
+    console.log(`Total stickers on canvas: ${newStickers.length}`);
+}, { deep: true });
+
 watch(selectedImage, (newValue) => {
     if (newValue) {
         imgRef.value.src = newValue;
@@ -263,19 +271,23 @@ defineExpose({ addSticker });
                     height: `${sticker.style.heightPercent}%`,
                     transform: sticker.style.transform
                 }" :data-id="sticker.id" class="sticker" @mousedown="selectSticker(sticker.id)">
-                    <img :src="sticker.src" style="width: 100%; height: 100%; object-fit: fill;" />
+                    <img :src="sticker.src" style="width: 100%; height: 100%; object-fit: contain;" />
                     <button @click="deleteSticker(sticker.id)" class="delete-btn">
                         X
                     </button>
                 </div>
+
                 <Moveable v-if="selectedSticker" class="moveable" :target="`.sticker[data-id='${selectedSticker}']`"
-                    :draggable="true" :scalable="true" :rotatable="true" :origin="false" :keepRatio="false"
-                    :throttleDrag="throttleDrag" :throttleScale="throttleScale" :throttleRotate="throttleRotate"
-                    :renderDirections="['nw', 'n', 'ne', 'w', 'e', 'sw', 's', 'se']" :rotationPosition="'top'"
-                    @drag="onDrag" @scale="onScale" @scaleStart="onScaleStart" @rotate="onRotate" />
+                    :draggable="true" :rotatable="true" :resizable="true" :origin="false" :keepRatio="true"
+                    :throttleDrag="throttleDrag" :throttleResize="throttleResize"
+                    :renderDirections="['nw', 'ne', 'sw', 'se']" :rotationPosition="'top'" @drag="onDrag" @resize="onResize"
+                    @rotate="onRotate" />
+
             </div>
         </div>
         <div class="mt-5 flex items-center justify-center gap-5">
+            <button v-if="showSticker" class="bg-Secondary " @click="confirmMerge">Confirm</button>
+            <button v-if="showSticker" class="bg-Secondary " @click="clearStickers">Cancel</button>
             <label for="file-upload"
                 class="bg-Secondary rounded-2xl w-[6vw] h-[6vh] content-center text-center hover:cursor-pointer">
                 Import
@@ -291,7 +303,6 @@ defineExpose({ addSticker });
         </div>
     </div>
 </template>
-
 
 <style scoped>
 .sticker {
@@ -317,4 +328,6 @@ defineExpose({ addSticker });
 </style>
 
 
-
+// next fix
+// Fix onResize more sensitive
+// Sticker can't go to other gallery same with saved image
