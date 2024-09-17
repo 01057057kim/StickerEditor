@@ -17,6 +17,11 @@ let images = ref([
     { src: addon5, alt: 'add on 5' },
     { src: addon6, alt: 'add on 6' },
     { src: addon7, alt: 'add on 7' },
+    { src: addon3, alt: 'add on 3' },
+    { src: addon4, alt: 'add on 4' },
+    { src: addon5, alt: 'add on 5' },
+    { src: addon6, alt: 'add on 6' },
+    { src: addon7, alt: 'add on 7' },
 ]);
 
 const handleStickerSelected = inject('handleStickerSelected');
@@ -27,11 +32,14 @@ const onStickerClick = (stickerSrc) => {
 </script>
 
 <template>
-    <div class="bg-Surface left-0 h-screen w-[22vw] py-5">
-        <div class="max-h-[95vh] w-[22vw] overflow-y-auto grid grid-cols-2 gap-2 items-center justify-center p-5">
+    <div class="bg-Secondary w-[400px] h-screen relative">
+        <h1 class="font-bold  text-Headline text-center text-4xl bg-Highlight">Sticker</h1>
+        <button class="bg-Button p-4 absolute -right-12">TEST</button>
+        <div
+            class="bg-Secondary max-h-[95vh] w-[400px] overflow-y-auto grid grid-cols-2 gap-2 items-center justify-center p-5 ">
             <div v-for="(img, index) in images" :key="index" class="object-fill flex justify-center items-center">
-                <img class="max-w-[8vw] cursor-pointer hover:opacity-60 transition-opacity duration-200" :src="img.src"
-                    :alt="img.alt" @click="onStickerClick(img.src)" />
+                <img class="border-Stroke border-4 rounded-xl max-w-[8vw] cursor-pointer hover:opacity-60 transition-opacity duration-200"
+                    :src="img.src" :alt="img.alt" @click="onStickerClick(img.src)" />
             </div>
         </div>
     </div>

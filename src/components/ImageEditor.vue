@@ -3,6 +3,8 @@ import { ref, provide } from 'vue';
 import AsideLeft from './ImageEditorComponent/AsideLeft.vue';
 import AsideRight from './ImageEditorComponent/AsideRight.vue';
 import Editor from './ImageEditorComponent/Editor.vue';
+import AsideNav from './ImageEditorComponent/AsideNav.vue';
+
 import addon1 from "../assets/Images/gallery/out12.jpg"
 import addon2 from "../assets/Images/gallery/out3.png"
 import addon4 from "../assets/Images/gallery/out4.png"
@@ -51,15 +53,16 @@ provide('savedImages', savedImages);
 </script>
 
 <template>
-    <section class="bg-Background h-screen gap-10 mx-auto grid grid-rows-3 relative">
-        <aside class="row-span-1 w-[400px] absolute left-0">
-            <AsideLeft />
+    <section class="bg-Background h-screen ">
+        <aside class="">
+            <AsideNav />
+            <!--<AsideLeft />-->
         </aside>
-        <main class="row-span-1 flex items-center justify-center min-h-screen absolute left-1/4 right-1/4">
+        <!--<main class="row-span-1 flex items-center justify-center min-h-screen absolute left-1/4 right-1/4">
             <Editor ref="editorRef" :selected-image="selectedImage" @newImage="handleNewImage" />
         </main>
         <aside class="row-span-1 h-screen flex justify-end absolute right-0 ">
             <AsideRight @select-image="selectedImage = $event" />
-        </aside>
+        </aside>-->
     </section>
 </template>
