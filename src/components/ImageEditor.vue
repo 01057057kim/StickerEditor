@@ -58,11 +58,11 @@ provide('savedImages', savedImages);
             <AsideNav />
             <!--<AsideLeft />-->
         </aside>
-        <!--<main class="row-span-1 flex items-center justify-center min-h-screen absolute left-1/4 right-1/4">
+        <main class="row-span-1 flex items-center justify-center min-h-screen absolute left-1/4 right-1/4">
             <Editor ref="editorRef" :selected-image="selectedImage" @newImage="handleNewImage" />
         </main>
         <aside class="row-span-1 h-screen flex justify-end absolute right-0 ">
             <AsideRight @select-image="selectedImage = $event" />
-        </aside>-->
+        </aside>
     </section>
 </template>

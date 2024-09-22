@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import Sticker from './AsideLeft/Sticker.vue';
 import ImageLibary from './AsideLeft/Image.vue';
 import Saved from './AsideLeft/Saved.vue';
@@ -12,25 +12,25 @@ const bgClass = ref('bg-Background');
 
 function clicked(type) {
     if (type === 'sticker') {
-        showSticker.value = true;
+        showSticker.value = !showSticker.value;
         showImageLibrary.value = false;
         showSaved.value = false;
-        bgClass.value = 'bg-Secondary';
     } else if (type === 'image') {
         showSticker.value = false;
-        showImageLibrary.value = true;
+        showImageLibrary.value = !showImageLibrary.value;
         showSaved.value = false;
-        bgClass.value = 'bg-Secondary';
     } else if (type === 'saved') {
         showSticker.value = false;
         showImageLibrary.value = false;
-        showSaved.value = true;
-        bgClass.value = 'bg-Secondary';
+        showSaved.value = !showSaved.value;
     }
+    updateBgClass();
 }
 
 function mouseEnter(type) {
-    hover.value = type;
+    if (!showSticker.value && !showImageLibrary.value && !showSaved.value) {
+        hover.value = type;
+    }
 }
 
 function mouseLeave() {
@@ -45,21 +45,32 @@ function close(type) {
     } else if (type === 'saved') {
         showSaved.value = false;
     }
-    bgClass.value = 'bg-Background';
+    updateBgClass();
+}
+
+function updateBgClass() {
+    bgClass.value = showSticker.value || showImageLibrary.value || showSaved.value ? 'bg-Background' : 'bg-Background';
 }
 </script>
 
 <template>
     <div :class="[bgClass, 'h-screen w-[5vw] flex flex-row fixed']">
-        <!--<h1 class="font-bold uppercase text-center text-xl pt-2">EDIT</h1>
-        <hr class="border-solid border-Stroke border-1 mt-4" />-->
-
-        <!-- Sticker component -->
-        <ul class="w-full h-screen flex-col justify-center items-center pt-9 space-y-5">
+        <ul class="w-full h-screen flex-col justify-center items-center pt-10 space-y-1">
+            <!-- Sticker component -->
             <li class="text-center flex flex-col justify-center items-center">
-                <div class="group flex flex-col justify-center items-center px-2 cursor-pointer relative w-full"
-                    @click="clicked('sticker')" @mouseenter="mouseEnter('sticker')" @mouseleave="mouseLeave">
-                    <button class="bg-transparent hover:bg-Tertiary hover:rounded-xl p-1 flex justify-center items-center">
+                <div :class="[
+                    showSticker ? 'bg-Secondary' : 'bg-transparent',
+                    'group flex flex-col justify-center items-center pt-2 pb-1 cursor-pointer relative w-full transition-all duration-300 ease-in-out'
+                ]" @click="clicked('sticker')" @mouseenter="mouseEnter('sticker')" @mouseleave="mouseLeave">
+                    <button :class="[
+                        'transition-all duration-300 ease-in-out',
+                        'p-1 flex justify-center items-center',
+                        (hover === 'sticker' && !showSticker) ?
+                            'bg-Background hover:bg-Tertiary rounded-xl shadow-[0_1px_10px_-1px] shadow-slate-800 transform scale-110' :
+                            'bg-transparent',
+                        showSticker ?
+                            'bg-Tertiary rounded-xl shadow-[0_1px_10px_-1px] shadow-slate-800 transform scale-110' : ''
+                    ]">
                         <svg width="2vw" height="4vh" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M9 16C9.85038 16.6303 10.8846 17 12 17C13.1154 17 14.1496 16.6303 15 16"
                                 stroke="#1C274C" stroke-width="1.5" stroke-linecap="round" />
@@ -70,15 +81,28 @@ function close(type) {
                                 stroke="#1C274C" stroke-width="1.5" stroke-linecap="round" />
                         </svg>
                     </button>
-                    <span>Sticker</span>
+                    <span class="mt-1 transition-all duration-300 ease-in-out"
+                        :class="{ 'opacity-100': hover === 'sticker' || showSticker, 'opacity-0': hover !== 'sticker' && !showSticker }">
+                        Sticker
+                    </span>
                 </div>
             </li>
 
             <!-- ImageLibrary component -->
             <li class="text-center flex flex-col justify-center items-center">
-                <div class="group flex flex-col justify-center items-center px-2 cursor-pointer relative w-full"
-                    @click="clicked('image')" @mouseenter="mouseEnter('image')" @mouseleave="mouseLeave">
-                    <button class="bg-transparent hover:bg-Tertiary hover:rounded-xl p-1 flex justify-center items-center">
+                <div :class="[
+                    showImageLibrary ? 'bg-Secondary' : 'bg-transparent',
+                    'group flex flex-col justify-center items-center pt-2 pb-1 cursor-pointer relative w-full transition-all duration-300 ease-in-out'
+                ]" @click="clicked('image')" @mouseenter="mouseEnter('image')" @mouseleave="mouseLeave">
+                    <button :class="[
+                        'transition-all duration-300 ease-in-out',
+                        'p-1 flex justify-center items-center',
+                        (hover === 'image' && !showImageLibrary) ?
+                            'bg-Background hover:bg-Tertiary rounded-xl shadow-[0_1px_10px_-1px] shadow-slate-800 transform scale-110' :
+                            'bg-transparent',
+                        showImageLibrary ?
+                            'bg-Tertiary rounded-xl shadow-[0_1px_10px_-1px] shadow-slate-800 transform scale-110' : ''
+                    ]">
                         <svg width="2vw" height="4vh" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <circle cx="16" cy="8" r="2" stroke="#1C274C" stroke-width="1.5" />
                             <path
@@ -89,15 +113,28 @@ function close(type) {
                                 stroke="#1C274C" stroke-width="1.5" stroke-linecap="round" />
                         </svg>
                     </button>
-                    <span>Image</span>
+                    <span class="mt-1 transition-all duration-300 ease-in-out"
+                        :class="{ 'opacity-100': hover === 'image' || showImageLibrary, 'opacity-0': hover !== 'image' && !showImageLibrary }">
+                        Image
+                    </span>
                 </div>
             </li>
 
             <!-- Saved component -->
             <li class="text-center flex flex-col justify-center items-center">
-                <div class="group flex flex-col justify-center items-center px-2 cursor-pointer relative w-full"
-                    @click="clicked('saved')" @mouseenter="mouseEnter('saved')" @mouseleave="mouseLeave">
-                    <button class="bg-transparent hover:bg-Tertiary hover:rounded-xl p-1 flex justify-center items-center">
+                <div :class="[
+                    showSaved ? 'bg-Secondary' : 'bg-transparent',
+                    'group flex flex-col justify-center items-center pt-2 pb-1 cursor-pointer relative w-full transition-all duration-300 ease-in-out'
+                ]" @click="clicked('saved')" @mouseenter="mouseEnter('saved')" @mouseleave="mouseLeave">
+                    <button :class="[
+                        'transition-all duration-300 ease-in-out',
+                        'p-1 flex justify-center items-center',
+                        (hover === 'saved' && !showSaved) ?
+                            'bg-Background hover:bg-Tertiary rounded-xl shadow-[0_1px_10px_-1px] shadow-slate-800 transform scale-110' :
+                            'bg-transparent',
+                        showSaved ?
+                            'bg-Tertiary rounded-xl shadow-[0_1px_10px_-1px] shadow-slate-800 transform scale-110' : ''
+                    ]">
                         <svg width="2vw" height="4vh" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M9.5 14.4L10.9286 16L14.5 12" stroke="#1C274C" stroke-width="1.5"
                                 stroke-linecap="round" stroke-linejoin="round" />
@@ -109,15 +146,24 @@ function close(type) {
                                 stroke="#1C274C" stroke-width="1.5" stroke-linecap="round" />
                         </svg>
                     </button>
-                    <span>Saved</span>
+                    <span class="mt-1 transition-all duration-300 ease-in-out"
+                        :class="{ 'opacity-100': hover === 'saved' || showSaved, 'opacity-0': hover !== 'saved' && !showSaved }">
+                        Saved
+                    </span>
                 </div>
             </li>
 
             <!-- Info component -->
             <li class="text-center flex flex-col justify-center items-center">
-                <div class="group flex flex-col justify-center items-center px-2 cursor-pointer relative w-full"
-                    @click="clicked">
-                    <button class="bg-transparent hover:bg-Tertiary hover:rounded-xl p-1 flex justify-center items-center">
+                <div class="group flex flex-col justify-center items-center pt-2 pb-1 cursor-pointer relative w-full"
+                    @click="clicked('info')" @mouseenter="mouseEnter('info')" @mouseleave="mouseLeave">
+                    <button :class="[
+                        'transition-all duration-300 ease-in-out',
+                        'p-1 flex justify-center items-center',
+                        hover === 'info' ?
+                            'bg-Background hover:bg-Tertiary rounded-xl shadow-[0_1px_10px_-1px] shadow-slate-800 transform scale-110' :
+                            'bg-transparent hover:bg-Tertiary hover:rounded-xl'
+                    ]">
                         <svg width="2vw" height="4vh" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M12 17V11" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round" />
                             <circle cx="1" cy="1" r="1" transform="matrix(1 0 0 -1 11 9)" fill="#1C274C" />
@@ -126,30 +172,36 @@ function close(type) {
                                 stroke="#1C274C" stroke-width="1.5" stroke-linecap="round" />
                         </svg>
                     </button>
-                    <span>Info</span>
+                    <span class="mt-1 transition-all duration-300 ease-in-out"
+                        :class="{ 'opacity-100': hover === 'info', 'opacity-0': hover !== 'info' }">
+                        Info
+                    </span>
                 </div>
             </li>
         </ul>
+
         <!-- Sticker component -->
-        <div v-if="(showSticker || (hover === 'sticker' && !showSticker && !showImageLibrary && !showSaved))"
-            class="absolute left-[5vw] top-0">
-            <Sticker @close="() => close('sticker')" />
-        </div>
+        <transition name="slide-fade">
+            <div v-if="(showSticker || (hover === 'sticker' && !showSticker && !showImageLibrary && !showSaved))"
+                class="absolute left-[5vw] top-0">
+                <Sticker :showCloseButton="showSticker" @close="() => close('sticker')" />
+            </div>
+        </transition>
 
         <!-- ImageLibrary component -->
-        <div v-if="(showImageLibrary || (hover === 'image' && !showSticker && !showImageLibrary && !showSaved))"
-            class="absolute left-[5vw] top-0">
-            <ImageLibary @close="() => close('image')" />
-        </div>
+        <transition name="slide-fade">
+            <div v-if="(showImageLibrary || (hover === 'image' && !showSticker && !showImageLibrary && !showSaved))"
+                class="absolute left-[5vw] top-0">
+                <ImageLibary :showCloseButton="showImageLibrary" @close="() => close('image')" />
+            </div>
+        </transition>
 
         <!-- Saved component -->
-        <div v-if="(showSaved || (hover === 'saved' && !showSticker && !showImageLibrary && !showSaved))"
-            class="absolute left-[5vw] top-0">
-            <Saved @close="() => close('saved')" />
-        </div>
+        <transition name="slide-fade">
+            <div v-if="(showSaved || (hover === 'saved' && !showSticker && !showImageLibrary && !showSaved))"
+                class="absolute left-[5vw] top-0">
+                <Saved :showCloseButton="showSaved" @close="() => close('saved')" />
+            </div>
+        </transition>
     </div>
 </template>
-
-<!--
-    Hover Fix when hover diff css
--->
