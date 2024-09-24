@@ -1,33 +1,44 @@
 <script setup>
 import { ref, defineProps, defineEmits, inject } from 'vue';
-import addon1 from '../../../assets/Images/sticker/add1.png';
-import addon2 from '../../../assets/Images/sticker/add2.png';
-import addon3 from '../../../assets/Images/sticker/add3.png';
-import addon4 from '../../../assets/Images/sticker/add4.png';
-import addon5 from '../../../assets/Images/sticker/add5.png';
-import addon6 from '../../../assets/Images/sticker/add6.png';
-import addon7 from '../../../assets/Images/sticker/add21.jpg';
 
-let images = ref([
-    { src: addon1, alt: 'add on 1' },
-    { src: addon2, alt: 'add on 2' },
-    { src: addon3, alt: 'add on 3' },
-    { src: addon4, alt: 'add on 4' },
-    { src: addon5, alt: 'add on 5' },
-    { src: addon6, alt: 'add on 6' },
-    { src: addon7, alt: 'add on 7' },
-    { src: addon3, alt: 'add on 3' },
-    { src: addon4, alt: 'add on 4' },
-    { src: addon5, alt: 'add on 5' },
-    { src: addon6, alt: 'add on 6' },
-    { src: addon7, alt: 'add on 7' },
-]);
+function getImageUrl(folder, name) {
+    return new URL(`../../../assets/Images/sticker/${folder}/${name}.png`, import.meta.url).href;
+}
+
+const stickerCategories = {
+    comic: ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
+    frames: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
+    reactions: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16']
+};
+
+const images = ref({
+    comic: stickerCategories.comic.map(name => ({
+        src: getImageUrl('Comic Stickers', name),
+        alt: `Comic Stickers ${name}`
+    })),
+    frames: stickerCategories.frames.map(name => ({
+        src: getImageUrl('Sticker Frames', name),
+        alt: `Sticker Frames ${name}`
+    })),
+    reactions: stickerCategories.reactions.map(name => ({
+        src: getImageUrl('Reaction Stickers', name),
+        alt: `Reaction Stickers ${name}`
+    }))
+});
 
 const handleStickerSelected = inject('handleStickerSelected');
 
 const onStickerClick = (stickerSrc) => {
     handleStickerSelected(stickerSrc);
 };
+
+const onScroll = (event) => {
+    event.preventDefault();
+    const scrollContainer = event.currentTarget;
+    scrollContainer.scrollLeft += event.deltaY;
+};
+
+
 const props = defineProps({
     showCloseButton: {
         type: Boolean,
@@ -42,7 +53,7 @@ function clicked() {
     isClosing.value = true;
     setTimeout(() => {
         emit('close');
-    }, 300);
+    }, 200);
 }
 </script>
 
@@ -56,17 +67,17 @@ function clicked() {
                 'bg-Secondary h-screen' :
                 'bg-Background my-4 rounded-xl shadow-[0_-1px_40px_-15px] shadow-slate-800/50 h-[95vh]'
         ]">
-            <div class="whitespace-nowrap overflow-hidden">
-                <!--------------------------------------------------------------->
-                <label>STICKER</label>
-                <div
-                    class="bg-transparent mt-3 max-h-[95vh] w-auto overflow-y-auto grid grid-cols-2 gap-2 items-center justify-center p-5 ">
-                    <div v-for="(img, index) in images" :key="index" class="object-fill flex justify-center items-center">
-                        <img class=" rounded-xl max-w-[8vw] cursor-pointer hover:opacity-60 transition-opacity duration-200"
+            <div v-for="(category, index) in Object.keys(images)" :key="index"
+                class="whitespace-nowrap overflow-hidden px-4">
+                <label>{{ category.toUpperCase() }}</label>
+                <!---NEED UPDATE LABEl BG STICKER ADD MORE FOLDER FOUND RIGHT COLOR AND FONT .. ADD LEFT RIGHT BUTTON???-->
+                <div class="bg-gradient-to-r from-[#ffa2cb] to-[#16A6D4] backdrop-blur-lg bg-opacity-30 to min-h-[18vh] w-full overflow-x-hidden flex items-center justify-start rounded-xl"
+                    @wheel="onScroll">
+                    <div v-for="(img, imgIndex) in images[category]" :key="imgIndex" class="object-fill ml-4 mr-2">
+                        <img class="rounded-xl max-w-[6vw] cursor-pointer hover:opacity-60 transition-opacity duration-200"
                             :src="img.src" :alt="img.alt" @click="onStickerClick(img.src)" />
                     </div>
                 </div>
-                <!--------------------------------------------------------------->
             </div>
         </div>
         <div v-if="props.showCloseButton" :class="[
@@ -93,5 +104,3 @@ button:hover .icon-svg path {
     stroke: #f25042;
 }
 </style>
-
-<!--box-shadow: inset | offset-x | offset-y | blur-radius | spread-radius | color-->

@@ -1,6 +1,5 @@
 <script setup>
 import { ref, provide } from 'vue';
-import AsideLeft from './ImageEditorComponent/AsideLeft.vue';
 import AsideRight from './ImageEditorComponent/AsideRight.vue';
 import Editor from './ImageEditorComponent/Editor.vue';
 import AsideNav from './ImageEditorComponent/AsideNav.vue';
@@ -56,7 +55,6 @@ provide('savedImages', savedImages);
     <section class="bg-Background h-screen ">
         <aside class="">
             <AsideNav />
-            <!--<AsideLeft />-->
         </aside>
         <main class="row-span-1 flex items-center justify-center min-h-screen absolute left-1/4 right-1/4">
             <Editor ref="editorRef" :selected-image="selectedImage" @newImage="handleNewImage" />

@@ -12,17 +12,17 @@ const bgClass = ref('bg-Background');
 
 function clicked(type) {
     if (type === 'sticker') {
-        showSticker.value = !showSticker.value;
+        showSticker.value = true;
         showImageLibrary.value = false;
         showSaved.value = false;
     } else if (type === 'image') {
         showSticker.value = false;
-        showImageLibrary.value = !showImageLibrary.value;
+        showImageLibrary.value = true;
         showSaved.value = false;
     } else if (type === 'saved') {
         showSticker.value = false;
         showImageLibrary.value = false;
-        showSaved.value = !showSaved.value;
+        showSaved.value = true;
     }
     updateBgClass();
 }
@@ -66,7 +66,7 @@ function updateBgClass() {
                         'transition-all duration-300 ease-in-out',
                         'p-1 flex justify-center items-center',
                         (hover === 'sticker' && !showSticker) ?
-                            'bg-Background hover:bg-Tertiary rounded-xl shadow-[0_1px_10px_-1px] shadow-slate-800 transform scale-110' :
+                            'bg-Background hover:bg-Tertiary rounded-xl shadow-[0_0px_10px_-1px] shadow-slate-800 transform scale-110' :
                             'bg-transparent',
                         showSticker ?
                             'bg-Tertiary rounded-xl shadow-[0_1px_10px_-1px] shadow-slate-800 transform scale-110' : ''
@@ -98,7 +98,7 @@ function updateBgClass() {
                         'transition-all duration-300 ease-in-out',
                         'p-1 flex justify-center items-center',
                         (hover === 'image' && !showImageLibrary) ?
-                            'bg-Background hover:bg-Tertiary rounded-xl shadow-[0_1px_10px_-1px] shadow-slate-800 transform scale-110' :
+                            'bg-Background hover:bg-Tertiary rounded-xl shadow-[0_0px_10px_-1px] shadow-slate-800 transform scale-110' :
                             'bg-transparent',
                         showImageLibrary ?
                             'bg-Tertiary rounded-xl shadow-[0_1px_10px_-1px] shadow-slate-800 transform scale-110' : ''
@@ -130,7 +130,7 @@ function updateBgClass() {
                         'transition-all duration-300 ease-in-out',
                         'p-1 flex justify-center items-center',
                         (hover === 'saved' && !showSaved) ?
-                            'bg-Background hover:bg-Tertiary rounded-xl shadow-[0_1px_10px_-1px] shadow-slate-800 transform scale-110' :
+                            'bg-Background hover:bg-Tertiary rounded-xl shadow-[0_0px_10px_-1px] shadow-slate-800 transform scale-110' :
                             'bg-transparent',
                         showSaved ?
                             'bg-Tertiary rounded-xl shadow-[0_1px_10px_-1px] shadow-slate-800 transform scale-110' : ''
@@ -183,7 +183,8 @@ function updateBgClass() {
         <!-- Sticker component -->
         <transition name="slide-fade">
             <div v-if="(showSticker || (hover === 'sticker' && !showSticker && !showImageLibrary && !showSaved))"
-                class="absolute left-[5vw] top-0">
+                class="absolute left-[5vw] top-0" @mouseenter="mouseEnter('sticker')" @mouseleave="mouseLeave"
+                @click="clicked('sticker')">
                 <Sticker :showCloseButton="showSticker" @close="() => close('sticker')" />
             </div>
         </transition>
@@ -191,7 +192,8 @@ function updateBgClass() {
         <!-- ImageLibrary component -->
         <transition name="slide-fade">
             <div v-if="(showImageLibrary || (hover === 'image' && !showSticker && !showImageLibrary && !showSaved))"
-                class="absolute left-[5vw] top-0">
+                class="absolute left-[5vw] top-0" @mouseenter="mouseEnter('image')" @mouseleave="mouseLeave"
+                @click="clicked('image')">
                 <ImageLibary :showCloseButton="showImageLibrary" @close="() => close('image')" />
             </div>
         </transition>
@@ -199,7 +201,8 @@ function updateBgClass() {
         <!-- Saved component -->
         <transition name="slide-fade">
             <div v-if="(showSaved || (hover === 'saved' && !showSticker && !showImageLibrary && !showSaved))"
-                class="absolute left-[5vw] top-0">
+                class="absolute left-[5vw] top-0" @mouseenter="mouseEnter('saved')" @mouseleave="mouseLeave"
+                @click="clicked('saved')">
                 <Saved :showCloseButton="showSaved" @close="() => close('saved')" />
             </div>
         </transition>

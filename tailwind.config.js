@@ -21,7 +21,7 @@ export default {
         //=============NEW PALETTE==================//
         'Background': '#f9f4ef',
         'Headline': '#020826',
-        'Paragraph': '#716040',
+        'Paragraph': '#d4b89d',
         'Button': '#8c7851',
         'Button-Text': '#fffffe',
         'Stroke': '#020826',

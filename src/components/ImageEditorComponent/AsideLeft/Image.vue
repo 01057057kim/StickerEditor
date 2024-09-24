@@ -15,7 +15,7 @@ function clicked() {
     isClosing.value = true;
     setTimeout(() => {
         emit('close');
-    }, 300);
+    }, 200);
 }
 </script>
 
