@@ -1,5 +1,5 @@
 <script setup>
-import { ref, defineProps, defineEmits } from 'vue';
+import { ref, defineProps, defineEmits, inject } from 'vue';
 
 const props = defineProps({
     showCloseButton: {
@@ -17,6 +17,14 @@ function clicked() {
         emit('close');
     }, 200);
 }
+
+const savedImages = inject('savedImages');
+const selectImage = (img) => {
+    emit("selectImage", img);
+};
+
+const getImageUrl = inject('getImageUrl');
+
 </script>
 
 <template>
@@ -31,6 +39,12 @@ function clicked() {
         ]">
             <div class="whitespace-nowrap overflow-hidden">
                 <label for="name">Saved</label>
+            </div>
+            <div class="">
+                <div v-for="(img, index) in savedImages" :key="index"
+                    class="object-fill flex justify-center items-center cursor-pointer" @click="selectImage(img)">
+                    <img class="max-w-[8vw]" :src="img" alt="Saved Image" />
+                </div>
             </div>
         </div>
         <div v-if="props.showCloseButton" :class="[
@@ -57,3 +71,5 @@ button:hover .icon-svg path {
     stroke: #f25042;
 }
 </style>
+
+// local storage

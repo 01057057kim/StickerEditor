@@ -1,5 +1,5 @@
 <script setup>
-import { ref, defineProps, defineEmits } from 'vue';
+import { ref, defineProps, defineEmits, inject } from 'vue';
 
 const props = defineProps({
     showCloseButton: {
@@ -8,7 +8,7 @@ const props = defineProps({
     }
 });
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close'], ["selectImage"]);
 const isClosing = ref(false);
 
 function clicked() {
@@ -17,6 +17,18 @@ function clicked() {
         emit('close');
     }, 200);
 }
+
+const images = inject('images')
+
+const selectImage = (img) => {
+    emit("selectImage", img);
+};
+
+const onScroll = (event) => {
+    event.preventDefault();
+    const scrollContainer = event.currentTarget;
+    scrollContainer.scrollLeft += event.deltaY;
+};
 </script>
 
 <template>
@@ -31,6 +43,13 @@ function clicked() {
         ]">
             <div class="whitespace-nowrap overflow-hidden">
                 <label for="name">Image</label>
+            </div>
+            <div class="min-h-[95vh] w-[full] overflow-x-hidden flex items-center justify-start rounded-xl"
+                @wheel="onScroll">
+                <div v-for="(img, index) in images" :key="index"
+                    class="object-fill flex justify-center items-center cursor-pointer" @click="selectImage(img.src)">
+                    <img class="min-w-[8vw]" :src="img.src" :alt="img.alt" />
+                </div>
             </div>
         </div>
         <div v-if="props.showCloseButton" :class="[
@@ -57,3 +76,7 @@ button:hover .icon-svg path {
     stroke: #f25042;
 }
 </style>
+
+
+// fix ui
+// change the import button to here

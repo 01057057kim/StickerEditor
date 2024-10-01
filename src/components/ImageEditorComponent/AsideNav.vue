@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, inject } from 'vue';
 import Sticker from './AsideLeft/Sticker.vue';
 import ImageLibary from './AsideLeft/Image.vue';
 import Saved from './AsideLeft/Saved.vue';
@@ -9,6 +9,9 @@ const showImageLibrary = ref(false);
 const showSaved = ref(false);
 const hover = ref(null);
 const bgClass = ref('bg-Background');
+const selectedImage = inject("selectedImage")
+const emit = defineEmits(["selectedImage"]);
+
 
 function clicked(type) {
     if (type === 'sticker') {
@@ -25,6 +28,8 @@ function clicked(type) {
         showSaved.value = true;
     }
     updateBgClass();
+    const popupWidth = 300; // or whatever width your popup is
+    emit('popup-toggled', showSticker.value || showImageLibrary.value || showSaved.value, popupWidth);
 }
 
 function mouseEnter(type) {
@@ -46,6 +51,7 @@ function close(type) {
         showSaved.value = false;
     }
     updateBgClass();
+    emit('popup-toggled', false, 0);
 }
 
 function updateBgClass() {
@@ -54,13 +60,13 @@ function updateBgClass() {
 </script>
 
 <template>
-    <div :class="[bgClass, 'h-screen w-[5vw] flex flex-row fixed']">
-        <ul class="w-full h-screen flex-col justify-center items-center pt-10 space-y-1">
+    <div :class="[bgClass, 'min-h-screen w-[5vw] flex flex-row fixed']">
+        <ul class="w-full h-screen flex-col justify-center items-center pt-10">
             <!-- Sticker component -->
             <li class="text-center flex flex-col justify-center items-center">
                 <div :class="[
                     showSticker ? 'bg-Secondary' : 'bg-transparent',
-                    'group flex flex-col justify-center items-center pt-2 pb-1 cursor-pointer relative w-full transition-all duration-300 ease-in-out'
+                    'group flex flex-col justify-center items-center pt-4 pb-1 cursor-pointer relative w-full transition-all duration-300 ease-in-out'
                 ]" @click="clicked('sticker')" @mouseenter="mouseEnter('sticker')" @mouseleave="mouseLeave">
                     <button :class="[
                         'transition-all duration-300 ease-in-out',
@@ -92,7 +98,7 @@ function updateBgClass() {
             <li class="text-center flex flex-col justify-center items-center">
                 <div :class="[
                     showImageLibrary ? 'bg-Secondary' : 'bg-transparent',
-                    'group flex flex-col justify-center items-center pt-2 pb-1 cursor-pointer relative w-full transition-all duration-300 ease-in-out'
+                    'group flex flex-col justify-center items-center pt-4 pb-1 cursor-pointer relative w-full transition-all duration-300 ease-in-out'
                 ]" @click="clicked('image')" @mouseenter="mouseEnter('image')" @mouseleave="mouseLeave">
                     <button :class="[
                         'transition-all duration-300 ease-in-out',
@@ -124,7 +130,7 @@ function updateBgClass() {
             <li class="text-center flex flex-col justify-center items-center">
                 <div :class="[
                     showSaved ? 'bg-Secondary' : 'bg-transparent',
-                    'group flex flex-col justify-center items-center pt-2 pb-1 cursor-pointer relative w-full transition-all duration-300 ease-in-out'
+                    'group flex flex-col justify-center items-center pt-4 pb-1 cursor-pointer relative w-full transition-all duration-300 ease-in-out'
                 ]" @click="clicked('saved')" @mouseenter="mouseEnter('saved')" @mouseleave="mouseLeave">
                     <button :class="[
                         'transition-all duration-300 ease-in-out',
@@ -155,7 +161,7 @@ function updateBgClass() {
 
             <!-- Info component -->
             <li class="text-center flex flex-col justify-center items-center">
-                <div class="group flex flex-col justify-center items-center pt-2 pb-1 cursor-pointer relative w-full"
+                <div class="group flex flex-col justify-center items-center pt-4 pb-1 cursor-pointer relative w-full"
                     @click="clicked('info')" @mouseenter="mouseEnter('info')" @mouseleave="mouseLeave">
                     <button :class="[
                         'transition-all duration-300 ease-in-out',
@@ -194,7 +200,8 @@ function updateBgClass() {
             <div v-if="(showImageLibrary || (hover === 'image' && !showSticker && !showImageLibrary && !showSaved))"
                 class="absolute left-[5vw] top-0" @mouseenter="mouseEnter('image')" @mouseleave="mouseLeave"
                 @click="clicked('image')">
-                <ImageLibary :showCloseButton="showImageLibrary" @close="() => close('image')" />
+                <ImageLibary :showCloseButton="showImageLibrary" @close="() => close('image')"
+                    @select-image="selectedImage = $event" />
             </div>
         </transition>
 
@@ -203,7 +210,7 @@ function updateBgClass() {
             <div v-if="(showSaved || (hover === 'saved' && !showSticker && !showImageLibrary && !showSaved))"
                 class="absolute left-[5vw] top-0" @mouseenter="mouseEnter('saved')" @mouseleave="mouseLeave"
                 @click="clicked('saved')">
-                <Saved :showCloseButton="showSaved" @close="() => close('saved')" />
+                <Saved :showCloseButton="showSaved" @close="() => close('saved')" @select-image="selectedImage = $event" />
             </div>
         </transition>
     </div>

@@ -1,37 +1,29 @@
 <script setup>
 import { ref, provide } from 'vue';
-import AsideRight from './ImageEditorComponent/AsideRight.vue';
 import Editor from './ImageEditorComponent/Editor.vue';
 import AsideNav from './ImageEditorComponent/AsideNav.vue';
 
-import addon1 from "../assets/Images/gallery/out12.jpg"
-import addon2 from "../assets/Images/gallery/out3.png"
-import addon4 from "../assets/Images/gallery/out4.png"
-import addon3 from "../assets/Images/gallery/out5.png"
-import addon5 from "../assets/Images/gallery/out6.png"
-import addon6 from "../assets/Images/gallery/out7.png"
-import addon7 from "../assets/Images/gallery/out8.png"
-import addon8 from "../assets/Images/gallery/out9.png"
-import addon9 from "../assets/Images/gallery/out10.png"
-import addon10 from "../assets/Images/gallery/out11.jpg"
+function getImageUrl(name) {
+    const images = import.meta.glob('../assets/Images/gallery/*.{png,jpg,jpeg}', { eager: true });
+    return images[`../assets/Images/gallery/${name}`]?.default;
+}
 
-let images = ref([
-    { src: addon1, alt: 'add on 1' },
-    { src: addon2, alt: 'add on 2' },
-    { src: addon3, alt: 'add on 3' },
-    { src: addon4, alt: 'add on 4' },
-    { src: addon5, alt: 'add on 5' },
-    { src: addon6, alt: 'add on 6' },
-    { src: addon7, alt: 'add on 7' },
-    { src: addon8, alt: 'add on 8' },
-    { src: addon9, alt: 'add on 9' },
-    { src: addon10, alt: 'add on 10' },
+const imageNames = [
+    '1.jpg', '2.png', '3.jpg', '4.png', '5.png',
+    '6.png', '7.png', '8.png', '9.png', '10.png'
+];
 
-])
+let images = ref(imageNames.map((name, index) => ({
+    src: getImageUrl(name),
+    alt: `Images ${index + 1}`
+})));
+
 let typeButton = ref(false);
 let selectedImage = ref(null);
 const savedImages = ref([]);
 const editorRef = ref(null);
+const isAsidePopupOpen = ref(false);
+const asidePopupWidth = ref(0);
 
 const handleNewImage = (newImage) => {
     images.value.unshift({ src: newImage, alt: 'New Image' });
@@ -43,24 +35,32 @@ const handleStickerSelected = (stickerSrc) => {
     }
 };
 
-provide('handleStickerSelected', handleStickerSelected);
+const handleAsidePopupToggle = (isOpen, width) => {
+    isAsidePopupOpen.value = isOpen;
+    asidePopupWidth.value = width;
+};
 
-provide('images', images)
+provide('handleAsidePopupToggle', handleAsidePopupToggle);
+provide('handleStickerSelected', handleStickerSelected);
+provide('images', images);
 provide('selectedImage', selectedImage);
 provide('typeButton', typeButton);
 provide('savedImages', savedImages);
 </script>
 
 <template>
-    <section class="bg-Background h-screen ">
-        <aside class="">
-            <AsideNav />
+    <div class="flex bg-Background min-h-screen ">
+        <aside class="w-[5vw] flex-shrink-0 z-10">
+            <AsideNav @popup-toggled="handleAsidePopupToggle" />
         </aside>
-        <main class="row-span-1 flex items-center justify-center min-h-screen absolute left-1/4 right-1/4">
-            <Editor ref="editorRef" :selected-image="selectedImage" @newImage="handleNewImage" />
+        <main class="flex-grow flex justify-center items-center transition-all duration-300 ease-in-out"
+            :style="{ marginLeft: isAsidePopupOpen ? `${asidePopupWidth}px` : '0' }">
+            <section class="w-full max-w-4xl flex justify-center items-center">
+                <Editor ref="editorRef" :selected-image="selectedImage" @newImage="handleNewImage" />
+            </section>
         </main>
-        <aside class="row-span-1 h-screen flex justify-end absolute right-0 ">
-            <AsideRight @select-image="selectedImage = $event" />
-        </aside>
-    </section>
+    </div>
 </template>
+
+
+// improve ui the editor button and responsive (mobile 390x844 desktop 1440x900)

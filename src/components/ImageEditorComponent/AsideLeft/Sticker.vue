@@ -1,5 +1,5 @@
 <script setup>
-import { ref, defineProps, defineEmits, inject } from 'vue';
+import { ref, defineProps, defineEmits, inject, reactive } from 'vue';
 
 function getImageUrl(folder, name) {
     return new URL(`../../../assets/Images/sticker/${folder}/${name}.png`, import.meta.url).href;
@@ -32,12 +32,15 @@ const onStickerClick = (stickerSrc) => {
     handleStickerSelected(stickerSrc);
 };
 
-const onScroll = (event) => {
+const onScroll = (event, category) => {
+    if (expandedCategories[category]) {
+
+        return;
+    }
     event.preventDefault();
     const scrollContainer = event.currentTarget;
     scrollContainer.scrollLeft += event.deltaY;
 };
-
 
 const props = defineProps({
     showCloseButton: {
@@ -55,52 +58,93 @@ function clicked() {
         emit('close');
     }, 200);
 }
-</script>
 
+const expandedCategories = reactive({
+    comic: false,
+    frames: false,
+    reactions: false
+});
+
+function toggleExpand(category) {
+    expandedCategories[category] = !expandedCategories[category];
+}
+</script>
 <template>
     <div class="relative flex">
         <div :class="[
             'transition-all duration-300 ease-in-out',
-            'mx-auto',
+            'mx-auto overflow-y-auto',
             isClosing ? 'w-0' : 'w-[20vw]',
             props.showCloseButton ?
                 'bg-Secondary h-screen' :
                 'bg-Background my-4 rounded-xl shadow-[0_-1px_40px_-15px] shadow-slate-800/50 h-[95vh]'
         ]">
-            <div v-for="(category, index) in Object.keys(images)" :key="index"
-                class="whitespace-nowrap overflow-hidden px-4">
-                <label>{{ category.toUpperCase() }}</label>
-                <!---NEED UPDATE LABEl BG STICKER ADD MORE FOLDER FOUND RIGHT COLOR AND FONT .. ADD LEFT RIGHT BUTTON???-->
-                <div class="bg-gradient-to-r from-[#ffa2cb] to-[#16A6D4] backdrop-blur-lg bg-opacity-30 to min-h-[18vh] w-full overflow-x-hidden flex items-center justify-start rounded-xl"
-                    @wheel="onScroll">
-                    <div v-for="(img, imgIndex) in images[category]" :key="imgIndex" class="object-fill ml-4 mr-2">
-                        <img class="rounded-xl max-w-[6vw] cursor-pointer hover:opacity-60 transition-opacity duration-200"
-                            :src="img.src" :alt="img.alt" @click="onStickerClick(img.src)" />
+            <div v-for="(category, index) in Object.keys(images)" :key="index" class="p-[1.5vh] space-y-[1vh] relative">
+                <div class="flex space-x-5">
+                    <h2 class="text-[2.5vh] font-semibold text-gray-800">
+                        {{ category.toUpperCase() }}
+                    </h2>
+                    <button @click="toggleExpand(category)"
+                        class="bg-blue-500 text-white px-1 py-1 text-xs rounded-full shadow-md hover:bg-blue-600 transition-colors duration-300">
+                        {{ expandedCategories[category] ? 'Collapse' : 'Expand' }}
+                    </button>
+                </div>
+                <div :class="[
+                    expandedCategories[category] ? 'grid grid-cols-2 gap-4' : 'flex items-center space-x-[1vw]',
+                    'py-[1vh] transition-all duration-300',
+                    expandedCategories[category] ? 'overflow-y-auto' : 'overflow-x-auto'
+                ]" @wheel="(event) => onScroll(event, category)">
+                    <div v-for="(img, imgIndex) in images[category]" :key="imgIndex"
+                        class="flex justify-center items-center flex-shrink-0 transition-transform duration-300 ease-in-out hover:scale-110 hover:brightness-125 ">
+                        <img :class="[
+                            expandedCategories[category] ? 'w-full h-auto' : 'w-[5vw] h-[5vw] max-w-[72px] max-h-[72px]',
+                            'rounded-md object-fill cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300'
+                        ]" :src="img.src" :alt="img.alt" @click="onStickerClick(img.src)" loading="lazy" />
                     </div>
                 </div>
             </div>
         </div>
-        <div v-if="props.showCloseButton" :class="[
-            'absolute top-4 transition-all duration-300 ease-in-out',
-            isClosing ? 'right-[calc(100%-3vw)]' : 'right-0'
-        ]">
-            <button class="cursor-pointer p-1 bg-Background rounded-l-xl hover:bg-Main" @click="clicked">
-                <svg class="icon-svg" width="2vw" height="4vh" viewBox="0 0 24 24" fill="none"
+        <transition enter-active-class="transition ease-out duration-300" enter-from-class="opacity-0 translate-x-4"
+            enter-to-class="opacity-100 translate-x-0" leave-active-class="transition ease-in duration-300"
+            leave-from-class="opacity-100 translate-x-0" leave-to-class="opacity-0 translate-x-14">
+            <button v-if="props.showCloseButton"
+                class="absolute top-[2vh] right-0 p-[1vh] bg-white rounded-l-md shadow-md hover:bg-gray-100 transition-colors duration-300"
+                @click="clicked">
+                <svg class="w-[2.5vh] h-[2.5vh] text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg">
-                    <path d="M14 8L10 12L14 16" stroke="#200E32" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                 </svg>
             </button>
-        </div>
+        </transition>
     </div>
 </template>
 
 <style scoped>
-.icon-svg {
-    transition: stroke 0.3s ease;
+.bg-Secondary {
+    background-color: #eaddcf;
 }
 
-button:hover .icon-svg path {
-    stroke: #f25042;
+div::-webkit-scrollbar {
+    width: 0.5vh;
+    height: 0.5vh;
+}
+
+div::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 1vh;
+}
+
+div::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 1vh;
+}
+
+div::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
 }
 </style>
+
+// fix ui Expand and Collapse
+
+// add more sticker
+// user can upload own sticker
