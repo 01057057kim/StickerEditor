@@ -22,7 +22,7 @@ A web-based image editor built with Vue.js that allows users to manipulate and e
   - Basic image editing functions
 
 - **User Interface**
-  - Responsive design
+  - Responsive design (OTW)
   - Intuitive drag-and-drop interface
   - Expandable/collapsible sidebar
   - Preview capabilities
@@ -35,12 +35,6 @@ This project is actively being developed with planned improvements including:
 - More editing tools and features
 - Local storage implementation
 - Performance optimizations
-
-## Technical Stack
-- Vue.js 3
-- Tailwind CSS
-- marker.js 2 (for image annotation)
-- vue3-moveable (for element manipulation)
 
 ## Note
 This is a work in progress, and new features are being added regularly. The current version is functional but may undergo significant changes as development continues.
