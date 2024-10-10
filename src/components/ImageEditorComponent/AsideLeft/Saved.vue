@@ -1,15 +1,16 @@
 <script setup>
 import { ref, defineProps, defineEmits, inject } from 'vue';
 
+const emit = defineEmits(['close']);
+const isClosing = ref(false);
+const getImageUrl = inject('getImageUrl');
+
 const props = defineProps({
     showCloseButton: {
         type: Boolean,
         default: true
     }
 });
-
-const emit = defineEmits(['close']);
-const isClosing = ref(false);
 
 function clicked() {
     isClosing.value = true;
@@ -22,8 +23,6 @@ const savedImages = inject('savedImages');
 const selectImage = (img) => {
     emit("selectImage", img);
 };
-
-const getImageUrl = inject('getImageUrl');
 
 </script>
 

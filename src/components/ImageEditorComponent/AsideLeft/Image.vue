@@ -1,15 +1,17 @@
 <script setup>
 import { ref, defineProps, defineEmits, inject } from 'vue';
 
+const emit = defineEmits(['close'], ["selectImage"]);
+const isClosing = ref(false);
+const handleImageSelected = inject('handleImageSelected');
+const images = inject('images')
+
 const props = defineProps({
     showCloseButton: {
         type: Boolean,
         default: true
     }
 });
-
-const emit = defineEmits(['close'], ["selectImage"]);
-const isClosing = ref(false);
 
 function clicked() {
     isClosing.value = true;
@@ -18,10 +20,10 @@ function clicked() {
     }, 200);
 }
 
-const images = inject('images')
 
 const selectImage = (img) => {
-    emit("selectImage", img);
+    handleImageSelected(img);
+    emit('close');
 };
 
 const onScroll = (event) => {

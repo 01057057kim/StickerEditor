@@ -11,7 +11,11 @@ const hover = ref(null);
 const bgClass = ref('bg-Background');
 const selectedImage = inject("selectedImage")
 const emit = defineEmits(["selectedImage"]);
+const handleImageSelected = inject('handleImageSelected');
 
+const onImageSelect = (img) => {
+    handleImageSelected(img);
+};
 
 function clicked(type) {
     if (type === 'sticker') {
@@ -28,7 +32,7 @@ function clicked(type) {
         showSaved.value = true;
     }
     updateBgClass();
-    const popupWidth = 300; // or whatever width your popup is
+    const popupWidth = 300;
     emit('popup-toggled', showSticker.value || showImageLibrary.value || showSaved.value, popupWidth);
 }
 
@@ -200,7 +204,7 @@ function updateBgClass() {
             <div v-if="(showImageLibrary || (hover === 'image' && !showSticker && !showImageLibrary && !showSaved))"
                 class="absolute left-[5vw] top-0" @mouseenter="mouseEnter('image')" @mouseleave="mouseLeave"
                 @click="clicked('image')">
-                <ImageLibary :showCloseButton="showImageLibrary" @close="() => close('image')"
+                <ImageLibary @selectImage="onImageSelect" :showCloseButton="showImageLibrary" @close="() => close('image')"
                     @select-image="selectedImage = $event" />
             </div>
         </transition>

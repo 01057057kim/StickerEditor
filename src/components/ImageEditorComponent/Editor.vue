@@ -7,17 +7,16 @@ import imagetest from '../../assets/Images/testimg.jpg';
 let imgRef = ref(null);
 let downloadButton = ref(null);
 let originalImageSrc = null;
-
 const selectedImage = inject('selectedImage');
 const savedImages = inject('savedImages');
 const images = inject('images');
 const stickers = ref([]);
 const selectedSticker = ref(null);
-
 const throttleDrag = 1;
 const throttleResize = 0;
-
 const showSticker = computed(() => stickers.value.length > 0);
+const props = defineProps(['selectedImage']);
+const emit = defineEmits(['newImage']);
 
 const confirmMerge = async () => {
     try {
@@ -31,28 +30,35 @@ const confirmMerge = async () => {
 }
 
 const addSticker = (stickerSrc) => {
-    const imgRect = imgRef.value.getBoundingClientRect();
+    const img = new Image();
+    img.onload = () => {
+        const imgRect = imgRef.value.getBoundingClientRect();
 
-    const defaultWidth = 150;
-    const defaultHeight = 150;
+        const aspectRatio = img.width / img.height;
+        const defaultWidth = 150;
+        const defaultHeight = defaultWidth / aspectRatio;
 
-    const newSticker = {
-        id: Date.now(),
-        src: stickerSrc,
-        style: {
-            position: 'absolute',
-            leftPercent: 50,
-            topPercent: 50,
-            widthPercent: (defaultWidth / imgRect.width) * 100,
-            heightPercent: (defaultHeight / imgRect.height) * 100,
-            transform: 'translate(-50%, -50%) rotate(0deg) scale(1, 1)'
-        }
+        const newSticker = {
+            id: Date.now(),
+            src: stickerSrc,
+            originalWidth: img.width,
+            originalHeight: img.height,
+            style: {
+                position: 'absolute',
+                leftPercent: 50,
+                topPercent: 50,
+                widthPercent: (defaultWidth / imgRect.width) * 100,
+                heightPercent: (defaultHeight / imgRect.height) * 100,
+                transform: 'translate(-50%, -50%) rotate(0deg) scale(1, 1)'
+            }
+        };
+
+        stickers.value.push(newSticker);
+        nextTick(() => {
+            selectedSticker.value = newSticker.id;
+        });
     };
-
-    stickers.value.push(newSticker);
-    nextTick(() => {
-        selectedSticker.value = newSticker.id;
-    });
+    img.src = stickerSrc;
 };
 
 const onDrag = ({ target, clientX, clientY }) => {
@@ -76,9 +82,19 @@ const onResize = ({ target, width, height }) => {
     const sticker = stickers.value.find(s => s.id === parseInt(target.dataset.id));
     if (sticker && imgRef.value) {
         const imgRect = imgRef.value.getBoundingClientRect();
+        const aspectRatio = sticker.originalWidth / sticker.originalHeight;
 
-        const widthPercent = (width / imgRect.width) * 100;
-        const heightPercent = (height / imgRect.height) * 100;
+        let newWidth = width;
+        let newHeight = height;
+
+        if (width / height > aspectRatio) {
+            newWidth = height * aspectRatio;
+        } else {
+            newHeight = width / aspectRatio;
+        }
+
+        const widthPercent = (newWidth / imgRect.width) * 100;
+        const heightPercent = (newHeight / imgRect.height) * 100;
 
         sticker.style.widthPercent = widthPercent;
         sticker.style.heightPercent = heightPercent;
@@ -88,7 +104,6 @@ const onResize = ({ target, width, height }) => {
 const onRotate = ({ target, rotate, transform }) => {
     const sticker = stickers.value.find(s => s.id === parseInt(target.dataset.id));
     if (sticker) {
-        // Extract the current scale values from the existing transform
         const currentTransform = sticker.style.transform;
         const scaleMatch = currentTransform.match(/scale\(([-\d.]+),\s*([-\d.]+)\)/);
         const scaleX = scaleMatch ? scaleMatch[1] : '1';
@@ -125,9 +140,6 @@ const mergeImages = () => {
             canvas.height = baseImage.height;
             ctx.drawImage(baseImage, 0, 0);
 
-            console.log('Canvas size:', { width: canvas.width, height: canvas.height });
-            console.log('Original image size:', { width: baseImage.width, height: baseImage.height });
-
             const loadStickers = stickers.value.map(sticker => {
                 return new Promise((resolveSticker) => {
                     const img = new Image();
@@ -146,8 +158,6 @@ const mergeImages = () => {
                         const widthPercent = sticker.style.widthPercent;
                         const heightPercent = sticker.style.heightPercent;
 
-                        console.log(`Sticker ${index + 1} size before merge:`, { widthPercent, heightPercent });
-
                         const leftPx = (leftPercent / 100) * canvas.width;
                         const topPx = (topPercent / 100) * canvas.height;
                         const width = (widthPercent / 100) * canvas.width;
@@ -163,18 +173,22 @@ const mergeImages = () => {
                             scaleY = parseFloat(transformMatch[3]);
                         }
 
-                        console.log(`Sticker ${index + 1} scale factors:`, { scaleX, scaleY });
-
                         ctx.save();
                         ctx.translate(leftPx, topPx);
                         ctx.rotate(rotation * Math.PI / 180);
 
-                        const finalWidth = width * scaleX;
-                        const finalHeight = height * scaleY;
+                        const originalAspectRatio = stickerImg.width / stickerImg.height;
 
-                        console.log(`Sticker ${index + 1} size after merge:`, { finalWidth, finalHeight });
+                        let newWidth = width * scaleX;
+                        let newHeight = height * scaleY;
 
-                        ctx.drawImage(stickerImg, -finalWidth / 2, -finalHeight / 2, finalWidth, finalHeight);
+                        if (newWidth / newHeight > originalAspectRatio) {
+                            newWidth = newHeight * originalAspectRatio;
+                        } else {
+                            newHeight = newWidth / originalAspectRatio;
+                        }
+
+                        ctx.drawImage(stickerImg, -newWidth / 2, -newHeight / 2, newWidth, newHeight);
                         ctx.restore();
                     }
                 });
@@ -186,7 +200,6 @@ const mergeImages = () => {
         baseImage.src = imgRef.value.src;
     });
 };
-
 
 const showMarkerArea = async () => {
     try {
@@ -248,6 +261,14 @@ onMounted(() => {
     };
 });
 
+watch(() => props.selectedImage, (newValue) => {
+    if (newValue) {
+        clearStickers();
+        imgRef.value.src = newValue;
+        downloadButton.value.href = newValue;
+    }
+});
+
 watch(stickers, (newStickers) => {
     console.log(`Total stickers on canvas: ${newStickers.length}`);
 }, { deep: true });
@@ -259,7 +280,7 @@ watch(selectedImage, (newValue) => {
     }
 });
 
-defineExpose({ addSticker });
+defineExpose({ addSticker, clearStickers });
 </script>
 
 <template>
@@ -341,7 +362,6 @@ defineExpose({ addSticker });
 
 
 // next fix
-// Fix onResize more sensitive
-// Sticker can't go to other gallery same with saved image
+// Fix onResize more sensitive  ( V )
 
 // add more font and color

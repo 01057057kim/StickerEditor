@@ -25,6 +25,15 @@ const editorRef = ref(null);
 const isAsidePopupOpen = ref(false);
 const asidePopupWidth = ref(0);
 
+
+
+const handleImageSelected = (newImage) => {
+    if (editorRef.value) {
+        editorRef.value.clearStickers();
+        selectedImage.value = newImage;
+    }
+};
+
 const handleNewImage = (newImage) => {
     images.value.unshift({ src: newImage, alt: 'New Image' });
 };
@@ -40,6 +49,7 @@ const handleAsidePopupToggle = (isOpen, width) => {
     asidePopupWidth.value = width;
 };
 
+provide('handleImageSelected', handleImageSelected);
 provide('handleAsidePopupToggle', handleAsidePopupToggle);
 provide('handleStickerSelected', handleStickerSelected);
 provide('images', images);
@@ -62,5 +72,27 @@ provide('savedImages', savedImages);
     </div>
 </template>
 
+<style>
+/* Global css */
+* {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+*:focus {
+    outline: none !important;
+}
+
+img {
+    -webkit-user-drag: none;
+}
+</style>
 
 // improve ui the editor button and responsive (mobile 390x844 desktop 1440x900)
+// color asideNav 
+// info use driver.js
