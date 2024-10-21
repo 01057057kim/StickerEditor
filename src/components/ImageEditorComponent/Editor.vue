@@ -3,6 +3,9 @@ import { ref, onMounted, inject, watch, nextTick, computed } from 'vue';
 import * as markerjs2 from 'markerjs2';
 import Moveable from "vue3-moveable";
 import imagetest from '../../assets/Images/testimg.jpg';
+import keycon from "keycon";
+
+keycon.setGlobal();
 
 let imgRef = ref(null);
 let downloadButton = ref(null);
@@ -61,6 +64,10 @@ const addSticker = (stickerSrc) => {
     img.src = stickerSrc;
 };
 
+const onResizeStart = e => {
+    e.setFixedDirection([0, 0]);
+};
+
 const onDrag = ({ target, clientX, clientY }) => {
     const sticker = stickers.value.find(s => s.id === parseInt(target.dataset.id));
     if (sticker && imgRef.value) {
@@ -78,7 +85,15 @@ const onDrag = ({ target, clientX, clientY }) => {
     }
 };
 
-const onResize = ({ target, width, height }) => {
+const onBeforeResize = e => {
+    if (keycon.global.shiftKey) {
+        e.setFixedDirection([-1, -1]);
+    } else {
+        e.setFixedDirection([0, 0]);
+    }
+};
+
+const onResize = ({ target, width, height, drag }) => {
     const sticker = stickers.value.find(s => s.id === parseInt(target.dataset.id));
     if (sticker && imgRef.value) {
         const imgRect = imgRef.value.getBoundingClientRect();
@@ -99,6 +114,8 @@ const onResize = ({ target, width, height }) => {
         sticker.style.widthPercent = widthPercent;
         sticker.style.heightPercent = heightPercent;
     }
+    target.style.cssText += `width: ${width}px; height: ${height}px`;
+    target.style.transform = drag.transform;
 };
 
 const onRotate = ({ target, rotate, transform }) => {
@@ -111,6 +128,23 @@ const onRotate = ({ target, rotate, transform }) => {
 
         sticker.style.transform = `translate(-50%, -50%) rotate(${rotate}deg) scale(${scaleX}, ${scaleY})`;
     }
+    target.style.transform = transform;
+};
+
+const onScaleStart = e => {
+    e.setFixedDirection([0, 0]);
+};
+
+const onBeforeScale = e => {
+    if (keycon.global.shiftKey) {
+        e.setFixedDirection([-1, -1]);
+    } else {
+        e.setFixedDirection([0, 0]);
+    }
+};
+
+const onScale = ({ target, drag }) => {
+    target.style.transform = drag.transform;
 };
 
 const deleteSticker = (id) => {
@@ -230,23 +264,6 @@ const showMarkerArea = async () => {
     }
 };
 
-const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    const reader = new FileReader();
-
-    reader.onload = () => {
-        originalImageSrc = reader.result;
-        imgRef.value.src = originalImageSrc;
-        downloadButton.value.href = originalImageSrc;
-        images.value.push({ src: originalImageSrc, alt: file.name });
-        emit('newImage', originalImageSrc);
-    };
-
-    if (file) {
-        reader.readAsDataURL(file);
-    }
-};
-
 onMounted(() => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -313,20 +330,18 @@ defineExpose({ addSticker, clearStickers });
                 </div>
 
                 <Moveable v-if="selectedSticker" class="moveable" :target="`.sticker[data-id='${selectedSticker}']`"
-                    :draggable="true" :rotatable="true" :resizable="true" :origin="false" :keepRatio="true"
+                    :draggable="true" :rotatable="true" :resizable="true" :scalable="true" :origin="false" :keepRatio="true"
                     :throttleDrag="throttleDrag" :throttleResize="throttleResize"
-                    :renderDirections="['nw', 'ne', 'sw', 'se']" :rotationPosition="'top'" @drag="onDrag" @resize="onResize"
-                    @rotate="onRotate" />
+                    :renderDirections='["nw", "n", "ne", "w", "e", "sw", "s", "se"]' :rotationPosition="'top'"
+                    :bounds="({ left: 0, top: 0, bottom: 0, right: 0, position: 'css' })" @resizeStart="onResizeStart"
+                    @drag="onDrag" @beforeResize="onBeforeResize" @resize="onResize" @rotate="onRotate"
+                    @scaleStart="onScaleStart" @beforeScale="onBeforeScale" @scale="onScale" />
             </div>
         </div>
 
         <div class="mt-8 flex items-center justify-center space-x-4">
             <button v-if="showSticker" @click="confirmMerge" class="btn btn-primary">Confirm</button>
             <button v-if="showSticker" @click="clearStickers" class="btn btn-secondary">Cancel</button>
-            <label for="file-upload" class="btn btn-secondary">
-                Import
-            </label>
-            <input id="file-upload" type="file" @change="handleFileUpload" accept="image/*" class="hidden" />
             <button @click="showMarkerArea" class="btn btn-secondary">
                 Edit
             </button>
@@ -365,3 +380,7 @@ defineExpose({ addSticker, clearStickers });
 // Fix onResize more sensitive  ( V )
 
 // add more font and color
+
+// if image to height the sticker got scale down
+
+// download button popup option?

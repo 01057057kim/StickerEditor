@@ -1,11 +1,10 @@
 <script setup>
-import { ref, defineProps, defineEmits, inject, reactive } from 'vue';
+import { ref, defineProps, defineEmits, inject, reactive, onMounted } from 'vue';
 
 const handleStickerSelected = inject('handleStickerSelected');
 const emit = defineEmits(['close']);
 const isClosing = ref(false);
 const customStickers = ref([]);
-const fileInput = ref(null);
 const errorMessage = ref('');
 const showError = ref(false);
 
@@ -40,7 +39,6 @@ const onStickerClick = (stickerSrc) => {
 
 const onScroll = (event, category) => {
     if (expandedCategories[category]) {
-
         return;
     }
     event.preventDefault();
@@ -74,13 +72,14 @@ function toggleExpand(category) {
 
 const uploadSticker = (event) => {
     const file = event.target.files[0];
+    const maxSize = 5 * 1024 * 1024;
+    const reader = new FileReader();
 
     if (!file) return;
 
     if (file.type !== 'image/png') {
         showError.value = true;
         errorMessage.value = 'Please upload PNG images only';
-        if (fileInput.value) fileInput.value.value = '';
         setTimeout(() => {
             showError.value = false;
             errorMessage.value = '';
@@ -88,11 +87,9 @@ const uploadSticker = (event) => {
         return;
     }
 
-    const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
         showError.value = true;
         errorMessage.value = 'File size should be less than 5MB';
-        if (fileInput.value) fileInput.value.value = '';
         setTimeout(() => {
             showError.value = false;
             errorMessage.value = '';
@@ -100,20 +97,19 @@ const uploadSticker = (event) => {
         return;
     }
 
-    const reader = new FileReader();
     reader.onload = (e) => {
-        customStickers.value.push({
+        const newSticker = {
             id: Date.now(),
             src: e.target.result,
             alt: file.name
-        });
+        };
+        customStickers.value.push(newSticker);
+        save();
     };
     reader.readAsDataURL(file);
-
-    if (fileInput.value) fileInput.value.value = '';
 };
 
-const handleUploadClick = () => {
+const handleUpload = () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/png';
@@ -128,15 +124,32 @@ const handleUploadClick = () => {
     input.click();
 };
 
-const deleteCustomSticker = (id) => {
+const deleteSticker = (id) => {
     customStickers.value = customStickers.value.filter(sticker => sticker.id !== id);
+    save();
 };
 
-const onCustomStickerClick = (stickerSrc) => {
+const uploadClick = (stickerSrc) => {
     handleStickerSelected(stickerSrc);
 };
 
+const save = () => {
+    localStorage.setItem('customStickers', JSON.stringify(customStickers.value));
+};
+
+onMounted(() => {
+    const savedStickers = localStorage.getItem('customStickers');
+    if (savedStickers) {
+        try {
+            customStickers.value = JSON.parse(savedStickers);
+        } catch (e) {
+            console.error('Error parsing saved stickers:', e);
+            customStickers.value = [];
+        }
+    }
+});
 </script>
+
 <template>
     <div class="relative flex">
         <div :class="[
@@ -148,7 +161,7 @@ const onCustomStickerClick = (stickerSrc) => {
                 'bg-Background my-4 rounded-xl shadow-[0_-1px_40px_-15px] shadow-slate-800/50 h-[95vh]'
         ]">
             <div v-for="(category, index) in Object.keys(images)" :key="index" class="p-[1.5vh] space-y-[1vh] relative">
-                <div class="flex space-x-5">
+                <div class="flex w-[10.5vw] justify-between">
                     <h2 class="text-[2.5vh] font-semibold text-gray-800">
                         {{ category.toUpperCase() }}
                     </h2>
@@ -179,9 +192,9 @@ const onCustomStickerClick = (stickerSrc) => {
                     <span class="block sm:inline">{{ errorMessage }}</span>
                 </div>
                 <div v-if="customStickers.length === 0"
-                    class=" h-[15vh] flex justify-center items-center border-Tertiary border-2 border-dashed rounded-xl p-2">
-                    <button @click="handleUploadClick"
-                        class="w-full h-full rounded transition flex justify-center items-center duration-300 space-x-2 hover:scale-125">
+                    class="h-[15vh] flex justify-center items-center border-Tertiary border-2 border-dashed rounded-xl p-2">
+                    <button @click="handleUpload"
+                        class="w-full h-full rounded transition flex justify-center items-center duration-300 space-x-2 hover:scale-110">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                             stroke="black">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -193,9 +206,9 @@ const onCustomStickerClick = (stickerSrc) => {
                 <div v-else class="min-h-[15vh] p-2 grid grid-cols-3 gap-2 border-white border-2 border-dashed rounded-xl">
                     <div v-for="sticker in customStickers" :key="sticker.id"
                         class="relative group flex items-center justify-center">
-                        <img :src="sticker.src" :alt="sticker.alt" @click="onCustomStickerClick(sticker.src)"
+                        <img :src="sticker.src" :alt="sticker.alt" @click="uploadClick(sticker.src)"
                             class="w-full h-full object-contain cursor-pointer rounded shadow hover:shadow-md transition-shadow duration-300" />
-                        <button @click="deleteCustomSticker(sticker.id)"
+                        <button @click="deleteSticker(sticker.id)"
                             class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                                 stroke="currentColor">
@@ -205,7 +218,7 @@ const onCustomStickerClick = (stickerSrc) => {
                         </button>
                     </div>
                     <div class="flex items-center justify-center">
-                        <button @click="handleUploadClick"
+                        <button @click="handleUpload"
                             class="border-Tertiary border-2 border-dashed rounded-xl text-white font-bold transition duration-300 flex items-center justify-center min-h-[12vh] w-full">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
                                 stroke="black">
@@ -273,5 +286,3 @@ div::-webkit-scrollbar-thumb:hover {
 
 // add more sticker
 // user can upload own sticker ( V )
-
-// UI
