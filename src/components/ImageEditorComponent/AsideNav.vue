@@ -10,8 +10,9 @@ const showSaved = ref(false);
 const hover = ref(null);
 const bgClass = ref('bg-Background');
 const selectedImage = inject("selectedImage")
-const emit = defineEmits(["selectedImage"]);
+const emit = defineEmits(['close', 'selectedImage', 'deleteImage']);
 const handleImageSelected = inject('handleImageSelected');
+const handleDriverTour = inject('handleDriverTour');
 
 const onImageSelect = (img) => {
     handleImageSelected(img);
@@ -61,19 +62,24 @@ function close(type) {
 function updateBgClass() {
     bgClass.value = showSticker.value || showImageLibrary.value || showSaved.value ? 'bg-Background' : 'bg-Background';
 }
+
+const deleteImageFromSaved = (index) => {
+    savedImages.value.splice(index, 1);
+    localStorage.setItem('savedImages', JSON.stringify(savedImages.value));
+};
 </script>
 
 <template>
     <div :class="[bgClass, 'min-h-screen w-[5vw] flex flex-row fixed']">
-        <ul class="w-full h-screen flex-col justify-center items-center pt-10">
+        <ul class="w-full h-screen flex-col justify-center items-center pt-10 ">
             <!-- Sticker component -->
             <li class="text-center flex flex-col justify-center items-center">
                 <div :class="[
-                    showSticker ? 'bg-Secondary' : 'bg-transparent',
+                    showSticker ? 'bg-Secondary' : 'bg-transparent ',
                     'group flex flex-col justify-center items-center pt-4 pb-1 cursor-pointer relative w-full transition-all duration-300 ease-in-out'
                 ]" @click="clicked('sticker')" @mouseenter="mouseEnter('sticker')" @mouseleave="mouseLeave">
                     <button :class="[
-                        'transition-all duration-300 ease-in-out',
+                        'transition-all duration-300 ease-in-out sticker-button',
                         'p-1 flex justify-center items-center',
                         (hover === 'sticker' && !showSticker) ?
                             'bg-Background hover:bg-Tertiary rounded-xl shadow-[0_0px_10px_-1px] shadow-slate-800 transform scale-110' :
@@ -105,7 +111,7 @@ function updateBgClass() {
                     'group flex flex-col justify-center items-center pt-4 pb-1 cursor-pointer relative w-full transition-all duration-300 ease-in-out'
                 ]" @click="clicked('image')" @mouseenter="mouseEnter('image')" @mouseleave="mouseLeave">
                     <button :class="[
-                        'transition-all duration-300 ease-in-out',
+                        'transition-all duration-300 ease-in-out image-button',
                         'p-1 flex justify-center items-center',
                         (hover === 'image' && !showImageLibrary) ?
                             'bg-Background hover:bg-Tertiary rounded-xl shadow-[0_0px_10px_-1px] shadow-slate-800 transform scale-110' :
@@ -131,13 +137,13 @@ function updateBgClass() {
             </li>
 
             <!-- Saved component -->
-            <li class="text-center flex flex-col justify-center items-center">
+            <li class="text-center flex flex-col justify-center items-center ">
                 <div :class="[
                     showSaved ? 'bg-Secondary' : 'bg-transparent',
                     'group flex flex-col justify-center items-center pt-4 pb-1 cursor-pointer relative w-full transition-all duration-300 ease-in-out'
                 ]" @click="clicked('saved')" @mouseenter="mouseEnter('saved')" @mouseleave="mouseLeave">
                     <button :class="[
-                        'transition-all duration-300 ease-in-out',
+                        'transition-all duration-300 ease-in-out saved-button',
                         'p-1 flex justify-center items-center',
                         (hover === 'saved' && !showSaved) ?
                             'bg-Background hover:bg-Tertiary rounded-xl shadow-[0_0px_10px_-1px] shadow-slate-800 transform scale-110' :
@@ -164,11 +170,11 @@ function updateBgClass() {
             </li>
 
             <!-- Info component -->
-            <li class="text-center flex flex-col justify-center items-center">
+            <li class="text-center flex flex-col justify-center items-center ">
                 <div class="group flex flex-col justify-center items-center pt-4 pb-1 cursor-pointer relative w-full"
                     @click="clicked('info')" @mouseenter="mouseEnter('info')" @mouseleave="mouseLeave">
-                    <button :class="[
-                        'transition-all duration-300 ease-in-out',
+                    <button @click="handleDriverTour" :class="[
+                        'transition-all duration-300 ease-in-out info-button',
                         'p-1 flex justify-center items-center',
                         hover === 'info' ?
                             'bg-Background hover:bg-Tertiary rounded-xl shadow-[0_1px_10px_-1px] shadow-slate-800 transform scale-110' :
@@ -214,8 +220,11 @@ function updateBgClass() {
             <div v-if="(showSaved || (hover === 'saved' && !showSticker && !showImageLibrary && !showSaved))"
                 class="absolute left-[5vw] top-0" @mouseenter="mouseEnter('saved')" @mouseleave="mouseLeave"
                 @click="clicked('saved')">
-                <Saved :showCloseButton="showSaved" @close="() => close('saved')" @select-image="selectedImage = $event" />
+                <Saved :showCloseButton="showSaved" @close="() => close('saved')" @select-image="selectedImage = $event"
+                    @deleteImage="deleteImageFromSaved" />
             </div>
         </transition>
+
+
     </div>
 </template>

@@ -1,7 +1,7 @@
 <script setup>
 import { ref, defineProps, defineEmits, inject, computed } from 'vue';
 
-const emit = defineEmits(['close', 'selectImage']);
+const emit = defineEmits(['close', 'selectImage', 'deleteImage']);
 const isClosing = ref(false);
 const savedImages = inject('savedImages');
 
@@ -23,6 +23,14 @@ const selectImage = (img) => {
     emit("selectImage", img);
 };
 
+
+const deleteImage = (index) => {
+    savedImages.value.splice(index, 1);
+    localStorage.setItem('savedImages', JSON.stringify(savedImages.value));
+
+};
+
+
 const hasSavedImages = computed(() => savedImages.value.length > 0);
 </script>
 
@@ -40,9 +48,17 @@ const hasSavedImages = computed(() => savedImages.value.length > 0);
                 <h2 class="text-[2.5vh] font-semibold text-gray-800">SAVED IMAGES</h2>
                 <div v-if="hasSavedImages" class="grid grid-cols-2 gap-4 py-[1vh]">
                     <div v-for="(img, index) in savedImages" :key="index"
-                        class="flex justify-center items-center transition-transform duration-300 ease-in-out hover:scale-110">
+                        class="group flex justify-center items-center transition-transform duration-300 ease-in-out hover:scale-110">
                         <img class="w-full h-auto rounded-md object-cover cursor-pointer shadow-sm hover:shadow-md transition-shadow duration-300"
                             :src="img" alt="Saved Image" @click="selectImage(img)" loading="lazy" />
+                        <button @click.stop="deleteImage(index)"
+                            class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
                 <div v-else class="flex items-center justify-center h-[50vh]">
