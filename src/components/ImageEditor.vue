@@ -114,6 +114,13 @@ const handleDriverTour = () => {
                 }
             },
             {
+                element: '.Save-button',
+                popover: {
+                    title: 'Save Image',
+                    description: 'Click this button to save the edited image from the canvas.'
+                }
+            },
+            {
                 element: '.download-button',
                 popover: {
                     title: 'Download Image',
@@ -130,7 +137,7 @@ onMounted(() => {
     if (!localStorage.getItem('visitedBefore')) {
         firstVisit.value = true;
         localStorage.setItem('visitedBefore', 'true');
-        //handleDriverTour();
+        handleDriverTour();
     }
 });
 

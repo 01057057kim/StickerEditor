@@ -116,7 +116,7 @@ onMounted(() => {
                 'bg-Secondary h-screen' :
                 'bg-Background my-4 rounded-xl shadow-[0_-1px_40px_-15px] shadow-slate-800/50 h-[95vh]'
         ]">
-            <div class="p-[1.5vh] space-y-[1vh] relative">
+            <div class="p-[1.5vh] space-y-[1vh] relative py-[2.5vh]">
                 <h2 class="text-[2.5vh] font-semibold text-gray-800 font-SourGummy">IMAGES</h2>
                 <div class="grid grid-cols-2 gap-4 py-[1vh]">
                     <div v-for="(img, index) in images" :key="index"
@@ -220,5 +220,3 @@ div::-webkit-scrollbar-thumb:hover {
     opacity: 0;
 }
 </style>
-
-// UI

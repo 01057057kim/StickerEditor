@@ -1,6 +1,6 @@
 <script setup>
 import { ref, defineProps, defineEmits, inject, computed } from 'vue';
-import { deleteImageFromDB, getAllImages } from '../../db';
+import { deleteImageFromDB, getAllImages, clearDB } from '../../db';
 import JSZip from 'jszip';
 
 const emit = defineEmits(['close', 'selectImage', 'deleteImage']);
@@ -58,7 +58,7 @@ const showErrorMessage = (message) => {
     setTimeout(() => {
         showError.value = false;
         errorMessage.value = '';
-    }, 3000); // Message will disappear after 3 seconds
+    }, 3000);
 };
 
 const deleteImage = async (id) => {
@@ -86,14 +86,10 @@ const dataURLtoBlob = (dataURL) => {
 
 const downloadImages = async () => {
     if (isDownloading.value) return;
-
-    // Check if there are any saved images
     if (!hasSavedImages.value) {
         showErrorMessage('No images available to download');
         return;
     }
-
-    // If in selection mode and no images selected, show message
     if (isSelectionMode.value && !hasSelectedImages.value) {
         showErrorMessage('Please select at least one image before downloading');
         return;
@@ -136,6 +132,11 @@ const downloadImages = async () => {
         isDownloading.value = false;
     }
 };
+
+const clearAllImages = async () => {
+    await clearDB();
+    savedImages.value = [];
+};
 </script>
 
 <template>
@@ -148,7 +149,7 @@ const downloadImages = async () => {
                 'bg-Secondary h-screen' :
                 'bg-Background my-4 rounded-xl shadow-[0_-1px_40px_-15px] shadow-slate-800/50 h-[95vh]'
         ]">
-            <div class="p-[1.5vh] space-y-[1vh] relative">
+            <div class="p-[1.5vh] space-y-[1vh] relative ">
                 <div class="flex flex-col gap-2 mt-2">
                     <div class="flex items-center justify-between">
                         <h2 class="text-[2.5vh] font-semibold text-gray-800 font-SourGummy">SAVED IMAGES</h2>
@@ -190,6 +191,9 @@ const downloadImages = async () => {
                                         'Download All'
                                 }}</span>
                             </button>
+                            <button
+                                class="px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white rounded-md transition-colors duration-300 text-sm"
+                                @click="clearAllImages">Clear All</button>
                         </div>
                         <!-- Error message -->
                         <transition enter-active-class="transition ease-out duration-300"
@@ -203,7 +207,6 @@ const downloadImages = async () => {
                         </transition>
                     </div>
                 </div>
-                <!-- Rest of the template remains the same -->
                 <div v-if="hasSavedImages" class="grid grid-cols-2 gap-4 py-[1vh]">
                     <div v-for="img in savedImages" :key="img.id"
                         class="group relative flex justify-center items-center transition-transform duration-300 ease-in-out hover:scale-105">

@@ -13,12 +13,18 @@ function getImageUrl(folder, name) {
 }
 
 const stickerCategories = {
+    punctuations: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '10.1', '11', '12', '13', '14', '15', '16'],
+    bubble: ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
     comic: ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
     frames: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
     reactions: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16']
 };
 
 const images = ref({
+    bubble: stickerCategories.bubble.map(name => ({
+        src: getImageUrl('Speech Bubble', name),
+        alt: `Bubble Stickers ${name}`
+    })),
     comic: stickerCategories.comic.map(name => ({
         src: getImageUrl('Comic Stickers', name),
         alt: `Comic Stickers ${name}`
@@ -30,7 +36,11 @@ const images = ref({
     reactions: stickerCategories.reactions.map(name => ({
         src: getImageUrl('Reaction Stickers', name),
         alt: `Reaction Stickers ${name}`
-    }))
+    })),
+    punctuations: stickerCategories.punctuations.map(name => ({
+        src: getImageUrl('Punctuations', name),
+        alt: `Punctuations ${name}`
+    })),
 });
 
 const onStickerClick = (stickerSrc) => {
@@ -160,8 +170,9 @@ onMounted(() => {
                 'bg-Secondary h-screen' :
                 'bg-Background my-4 rounded-xl shadow-[0_-1px_40px_-15px] shadow-slate-800/50 h-[95vh]'
         ]">
-            <div v-for="(category, index) in Object.keys(images)" :key="index" class="p-[1.5vh] space-y-[1vh] relative">
-                <div class="flex w-[10.5vw] justify-between">
+            <div v-for="(category, index) in Object.keys(images)" :key="index"
+                class="py-[2.5vh] px-[1.5vh] space-y-[0.5vh] relative">
+                <div class="flex w-[15.5vw] justify-between">
                     <h2 class="text-[2.7vh] font-semibold text-gray-800 font-SourGummy">
                         {{ category.toUpperCase() }}
                     </h2>
@@ -281,8 +292,3 @@ div::-webkit-scrollbar-thumb:hover {
     opacity: 0;
 }
 </style>
-
-// fix ui Expand and Collapse
-
-// add more sticker
-// user can upload own sticker ( V )
