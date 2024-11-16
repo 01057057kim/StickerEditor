@@ -1,5 +1,7 @@
 <script setup>
 import { ref, onMounted, inject, watch, nextTick, computed } from 'vue';
+import { saveImageToDB, getAllImages, clearDB } from '../db';
+
 import * as markerjs2 from 'markerjs2';
 import Moveable from "vue3-moveable";
 import keycon from "keycon";
@@ -21,16 +23,41 @@ const props = defineProps(['selectedImage']);
 const emit = defineEmits(['newImage', 'savedImage']);
 
 const saveImage = async () => {
-    const dataUrl = await mergeImages();
-    emit('savedImage', dataUrl);
-    savedImages.value.push(dataUrl);
-    localStorage.setItem('savedImages', JSON.stringify(savedImages.value));
+    try {
+        const dataUrl = await mergeImages();
+        await saveImageToDB(dataUrl);
+        const images = await getAllImages();
+        savedImages.value = images;
+        emit('savedImage', dataUrl);
+    } catch (error) {
+        console.error('Error saving image:', error);
+    }
 };
 
-onMounted(() => {
-    const savedImagesFromLocal = JSON.parse(localStorage.getItem('savedImages')) || [];
-    savedImages.value = savedImagesFromLocal;
+onMounted(async () => {
+    try {
+        selectedImage.value = images.value[0].src;
+        const savedImagesData = await getAllImages();
+        savedImages.value = savedImagesData;
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        img.onload = () => {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            originalImageSrc = canvas.toDataURL('image/png');
+            downloadButton.value.href = originalImageSrc;
+        };
+        img.src = selectedImage.value;
+    } catch (error) {
+        console.error('Error loading saved images:', error);
+        savedImages.value = [];
+    }
 });
+
+
 
 const confirmMerge = async () => {
     try {
@@ -278,12 +305,16 @@ const showMarkerArea = async () => {
 
         //CUSTOM FONT HERE 5000line 
         markerArea.show();
-        markerArea.addRenderEventListener((dataUrl) => {
-            savedImages.value.push(dataUrl);
-            localStorage.setItem('savedImages', JSON.stringify(savedImages.value));
-            imgRef.value.src = dataUrl;
-            downloadButton.value.href = dataUrl;
-
+        markerArea.addRenderEventListener(async (dataUrl) => {
+            try {
+                await saveImageToDB(dataUrl);
+                const images = await getAllImages();
+                savedImages.value = images;
+                imgRef.value.src = dataUrl;
+                downloadButton.value.href = dataUrl;
+            } catch (error) {
+                console.error('Error saving image:', error);
+            }
         });
         imgRef.value.src = mergedImageSrc;
         downloadButton.value.href = mergedImageSrc;
@@ -325,8 +356,8 @@ watch(selectedImage, (newValue) => {
         downloadButton.value.href = newValue;
     }
 });
-const clearLocalStorage = () => {
-    localStorage.clear();
+const clearAllImages = async () => {
+    await clearDB();
     savedImages.value = [];
 };
 defineExpose({ addSticker, clearStickers });
@@ -408,7 +439,7 @@ defineExpose({ addSticker, clearStickers });
                     </svg>
                 </span>
             </a>
-            <button @click="clearLocalStorage">Clear Local Storage</button>
+            <button @click="clearAllImages">Clear Local Storage</button>
         </div>
     </div>
 </template>
@@ -507,11 +538,11 @@ FONTS
 // Ma Shan Zheng, Liu Jian Mao Cao, ZCOOL KuaiLe, Rampart One, DotGothic16, Zen Kurenaido, Yuji Syuku
 
 ////////////////////////////////////////
-download button all on save image to zip file + if can select image want to download * 
+download button all on save image to zip file + if can select image want to download done
 
 change on resize to scaleable if needed
 
-save image local storage done but there a limit for image put on local storage 5MB. note i want place alert or popup if the local storage full *
+save image local storage done but there a limit for image put on local storage 5MB. note i want place alert or popup if the local storage full done
 
 test image.vue to save to local storage and load again to img done
 

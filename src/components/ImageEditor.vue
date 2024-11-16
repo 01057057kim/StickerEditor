@@ -74,7 +74,7 @@ const handleDriverTour = () => {
             {
                 element: '.aside-nav',
                 popover: {
-                    title: 'Aside Navigation',
+                    title: 'Navigation',
                     description: 'This is the aside navigation panel. You can access various features and tools from here.'
                 }
             },

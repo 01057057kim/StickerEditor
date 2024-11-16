@@ -117,7 +117,7 @@ onMounted(() => {
                 'bg-Background my-4 rounded-xl shadow-[0_-1px_40px_-15px] shadow-slate-800/50 h-[95vh]'
         ]">
             <div class="p-[1.5vh] space-y-[1vh] relative">
-                <h2 class="text-[2.5vh] font-semibold text-gray-800">IMAGES</h2>
+                <h2 class="text-[2.5vh] font-semibold text-gray-800 font-SourGummy">IMAGES</h2>
                 <div class="grid grid-cols-2 gap-4 py-[1vh]">
                     <div v-for="(img, index) in images" :key="index"
                         class="flex justify-center items-center transition-transform duration-300 ease-in-out hover:scale-105">
@@ -127,7 +127,7 @@ onMounted(() => {
                 </div>
             </div>
             <div class="p-[1.5vh] space-y-[1vh]">
-                <h2 class="text-[2.5vh] font-semibold text-gray-800">IMPORT</h2>
+                <h2 class="text-[2.5vh] font-semibold text-gray-800 font-SourGummy">IMPORT</h2>
                 <div v-if="showError" class="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded relative mb-4"
                     role="alert">
                     <span class="block sm:inline">{{ errorMessage }}</span>

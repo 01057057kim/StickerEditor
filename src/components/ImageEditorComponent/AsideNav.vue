@@ -10,7 +10,7 @@ const showSaved = ref(false);
 const hover = ref(null);
 const bgClass = ref('bg-Background');
 const selectedImage = inject("selectedImage")
-const emit = defineEmits(['close', 'selectedImage', 'deleteImage']);
+const emit = defineEmits(['close', 'selectedImage', 'deleteImage', 'popup-toggled']);
 const handleImageSelected = inject('handleImageSelected');
 const handleDriverTour = inject('handleDriverTour');
 

@@ -11,6 +11,10 @@ export default {
       'desktop': '1440px',
     },
     extend: {
+      fontFamily: {
+        'SourGummy': 'Sour Gummy, sans-serif'
+      },
+
       colors:
       {
         'Butterfly1': '#FF4066',

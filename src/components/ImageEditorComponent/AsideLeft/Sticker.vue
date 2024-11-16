@@ -162,7 +162,7 @@ onMounted(() => {
         ]">
             <div v-for="(category, index) in Object.keys(images)" :key="index" class="p-[1.5vh] space-y-[1vh] relative">
                 <div class="flex w-[10.5vw] justify-between">
-                    <h2 class="text-[2.5vh] font-semibold text-gray-800">
+                    <h2 class="text-[2.7vh] font-semibold text-gray-800 font-SourGummy">
                         {{ category.toUpperCase() }}
                     </h2>
                     <button @click="toggleExpand(category)"
@@ -186,7 +186,7 @@ onMounted(() => {
             </div>
             <!-- Custom Sticker -->
             <div class="p-[1.5vh] space-y-[1vh]">
-                <h2 class="text-[2.5vh] font-semibold text-gray-800">CUSTOM STICKERS</h2>
+                <h2 class="text-[2.5vh] font-semibold text-gray-800 font-SourGummy">CUSTOM STICKERS</h2>
                 <div v-if="showError" class="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded relative mb-4"
                     role="alert">
                     <span class="block sm:inline">{{ errorMessage }}</span>
