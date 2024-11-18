@@ -6,13 +6,14 @@ import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
 
 function getImageUrl(name) {
-    const images = import.meta.glob('../assets/Images/gallery/*.{png,jpg,jpeg}', { eager: true });
+    const images = import.meta.glob('../assets/Images/gallery/*.{png,png,jpeg}', { eager: true });
     return images[`../assets/Images/gallery/${name}`]?.default;
 }
 
 const imageNames = [
-    '1.jpg', '2.png', '3.jpg', '4.png', '5.png',
-    '6.png', '7.png', '8.png', '9.png', '10.png'
+    '1.png', '2.png', '3.png', '4.png', '5.png',
+    '6.png', '7.png', '8.png', '9.png', '10.png',
+    '11.png','12.png'
 ];
 
 let images = ref(imageNames.map((name, index) => ({

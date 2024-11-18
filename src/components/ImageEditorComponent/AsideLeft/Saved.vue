@@ -154,62 +154,11 @@ const clearAllImages = async () => {
                     <div class="flex items-center justify-between">
                         <h2 class="text-[2.5vh] font-semibold text-gray-800 font-SourGummy">SAVED IMAGES</h2>
                     </div>
-                    <div class="flex flex-col gap-2">
-                        <div class="flex justify-start">
-                            <button @click="toggleSelectionMode"
-                                class="px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white rounded-md transition-colors duration-300 text-sm"
-                                :class="{ 'bg-blue-500 hover:bg-blue-600': isSelectionMode }">
-                                {{ isSelectionMode ? 'Cancel Selection' : 'Select Multiple' }}
-                            </button>
-                            <button @click="downloadImages" :disabled="isDownloading"
-                                class="px-3 py-1 text-white rounded-md transition-colors duration-300 flex items-center space-x-1 text-sm"
-                                :class="{
-                                    'bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300': !isSelectionMode,
-                                    'bg-green-500 hover:bg-green-600 disabled:bg-green-300': isSelectionMode
-                                }">
-                                <span v-if="isDownloading">
-                                    <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg"
-                                        fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                            stroke-width="4">
-                                        </circle>
-                                        <path class="opacity-75" fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                        </path>
-                                    </svg>
-                                </span>
-                                <span v-else>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                                        stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                    </svg>
-                                </span>
-                                <span>{{ isDownloading ? 'Creating Zip...' :
-                                    isSelectionMode ?
-                                        `Download Selected (${selectedImages.size})` :
-                                        'Download All'
-                                }}</span>
-                            </button>
-                            <button
-                                class="px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white rounded-md transition-colors duration-300 text-sm"
-                                @click="clearAllImages">Clear All</button>
-                        </div>
-                        <!-- Error message -->
-                        <transition enter-active-class="transition ease-out duration-300"
-                            enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100"
-                            leave-active-class="transition ease-in duration-200"
-                            leave-from-class="transform opacity-100 scale-100"
-                            leave-to-class="transform opacity-0 scale-95">
-                            <div v-if="showError" class="text-red-500 text-sm mt-1">
-                                {{ errorMessage }}
-                            </div>
-                        </transition>
-                    </div>
                 </div>
-                <div v-if="hasSavedImages" class="grid grid-cols-2 gap-4 py-[1vh]">
+                <div v-if="hasSavedImages"
+                    class="grid grid-cols-2 gap-4 pb-[1vh] overflow-x-hidden overflow-y-scroll w-auto h-[82vh]">
                     <div v-for="img in savedImages" :key="img.id"
-                        class="group relative flex justify-center items-center transition-transform duration-300 ease-in-out hover:scale-105">
+                        class="group relative flex justify-center items-start transition-transform duration-300 ease-in-out hover:scale-105">
                         <div class="relative w-full">
                             <img class="w-full h-auto rounded-md object-cover shadow-sm hover:shadow-md transition-shadow duration-300"
                                 :class="{ 'ring-2 ring-blue-500 opacity-75': selectedImages.has(img.id) }" :src="img.src"
@@ -237,8 +186,60 @@ const clearAllImages = async () => {
                     </div>
                 </div>
 
-                <div v-else class="flex items-center justify-center h-[50vh]">
+                <div v-else class="flex items-center justify-center h-[82vh]">
                     <p class="text-gray-500 text-center">There are no saved images yet.</p>
+                </div>
+
+                <div class="flex flex-col gap-2 ">
+                    <div class="flex justify-start mt-4">
+                        <button @click="toggleSelectionMode"
+                            class="px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white rounded-md transition-colors duration-300 text-sm"
+                            :class="{ 'bg-blue-500 hover:bg-blue-600': isSelectionMode }">
+                            {{ isSelectionMode ? 'Cancel Selection' : 'Select Multiple' }}
+                        </button>
+                        <button @click="downloadImages" :disabled="isDownloading"
+                            class="px-3 py-1 text-white rounded-md transition-colors duration-300 flex items-center space-x-1 text-sm"
+                            :class="{
+                                'bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300': !isSelectionMode,
+                                'bg-green-500 hover:bg-green-600 disabled:bg-green-300': isSelectionMode
+                            }">
+                            <span v-if="isDownloading">
+                                <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                        stroke-width="4">
+                                    </circle>
+                                    <path class="opacity-75" fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                    </path>
+                                </svg>
+                            </span>
+                            <span v-else>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                            </span>
+                            <span>{{ isDownloading ? 'Creating Zip...' :
+                                isSelectionMode ?
+                                    `Download Selected (${selectedImages.size})` :
+                                    'Download All'
+                            }}</span>
+                        </button>
+                        <button
+                            class="px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white rounded-md transition-colors duration-300 text-sm"
+                            @click="clearAllImages">Clear All</button>
+                    </div>
+                    <!-- Error message -->
+                    <transition enter-active-class="transition ease-out duration-300"
+                        enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100"
+                        leave-active-class="transition ease-in duration-200"
+                        leave-from-class="transform opacity-100 scale-100" leave-to-class="transform opacity-0 scale-95">
+                        <div v-if="showError" class="text-red-500 text-sm mt-1">
+                            {{ errorMessage }}
+                        </div>
+                    </transition>
                 </div>
             </div>
         </div>
